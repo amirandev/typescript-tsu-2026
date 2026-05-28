@@ -1,8 +1,8 @@
-# ლექცია 01: TypeScript-ის დაყენება და კონფიგურაცია
+# ლექცია 01: TypeScript საფუძვლები + React Vite-ით
 
 ![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?logo=typescript&logoColor=fff)
-![Node](https://img.shields.io/badge/Node.js-339933?logo=nodedotjs&logoColor=fff)
-![License](https://img.shields.io/badge/license-MIT-blue)
+![Vite](https://img.shields.io/badge/Vite-646CFF?logo=vite&logoColor=fff)
+![React](https://img.shields.io/badge/React-61DAFB?logo=react&logoColor=000)
 
 ---
 
@@ -11,58 +11,37 @@
 | # | თემა |
 |---|------|
 | 01 | [რა არის TypeScript?](./presentation.md#სლაიდი-1-რა-არის-typescript) |
-| 02 | [Playground](./presentation.md#სლაიდი-2-სცადე-typescript-ბრაუზერშივე--playground) |
-| 03 | [Node.js / npm ინსტალაცია](./presentation.md#სლაიდი-3-nodejs-და-npm-ის-ინსტალაცია) |
-| 04 | [TypeScript-ის ინსტალაცია](./presentation.md#სლაიდი-4-typescript-ის-ინსტალაცია) |
-| 05 | [tsconfig.json](./presentation.md#სლაიდი-5-tsconfigjson--კონფიგურაცია) |
-| 06 | [პროექტის სტრუქტურა](./presentation.md#სლაიდი-6-პროექტის-სტრუქტურა) |
-| 07 | [პირველი TypeScript კოდი](./presentation.md#სლაიდი-7-პირველი-typescript-კოდი) |
-| 08 | [HTML ინტეგრაცია](./presentation.md#სლაიდი-8-html-თან-ინტეგრაცია) |
-| 09 | [Watch რეჟიმი](./presentation.md#სლაიდი-9-watch-რეჟიმი) |
-| 10 | [npm Scripts](./presentation.md#სლაიდი-10-npm-scripts) |
-| 11 | [strict რეჟიმი](./presentation.md#სლაიდი-11-strict-რეჟიმი) |
-| 12 | [exclude / include](./presentation.md#სლაიდი-12-exclude--include) |
+| 02 | [Playground](./presentation.md#სლაიდი-2-სცადე-typescript-ბრაუზერშივე) |
+| 03 | [ძირითადი ტიპები](./presentation.md#სლაიდი-3-ძირითადი-ტიპები) |
+| 04 | [Vite + React + TS](./presentation.md#სლაიდი-4-vite--react--typescript) |
+| 05 | [TypeScript React-ში](./presentation.md#სლაიდი-5-typescript-react-ში) |
 
 ---
 
 ## 🎯 სასწავლო მიზნები
 
 - გავიგოთ რა არის TypeScript და რატომ გამოვიყენოთ
-- დავაყენოთ TypeScript გარემო (Node.js, npm, TypeScript compiler)
-- გავეცნოთ `tsconfig.json` კონფიგურაციას
-- ავაწყოთ პირველი TypeScript პროექტი
-- ვისწავლოთ კომპილაცია (`tsc`), watch რეჟიმი (`tsc -w`) და npm scripts
+- ვცადოთ TypeScript ონლაინ Playground-ში
+- გავეცნოთ ძირითად ტიპებს: `string`, `number`, `boolean`
+- შევქმნათ React + TypeScript პროექტი Vite-ით
+- დავწეროთ პირველი TypeScript კომპონენტი
 
 ---
 
-## 🗂️ პროექტის სტრუქტურა
-
-```
-lecture-01/
-├── src/                        # TypeScript წყაროს კოდი
-├── dist/                       # კომპილირებული JavaScript
-├── presentation.md             # სალექციო მასალა
-├── classwork.md                # საკლასო სამუშაო
-├── homework.md                 # საშინაო დავალება
-├── all-available-types.md      # TypeScript-ის ტიპების ცნობარი
-├── 01_typescript.html          # HTML ინტეგრაციის მაგალითი
-├── tsconfig.json               # TypeScript კონფიგურაცია
-└── package.json                # npm კონფიგურაცია
-```
-
----
-
-## 🚀 სწრაფი დაწყება
+## 🚀 სწრაფი დაწყება (კლასში)
 
 ```bash
-# 1. ინსტალაცია
+# 1. შექმენით ახალი Vite + React + TS პროექტი
+npx create-vite@latest my-ts-app --template react-ts
+
+# 2. გადადით პროექტში
+cd my-ts-app
+
+# 3. დააინსტალირეთ დამოკიდებულებები
 npm install
 
-# 2. კომპილაცია
-npm run build
-
-# 3. გაშვება
-npm run start
+# 4. გაუშვით დეველოპმენტ სერვერი
+npm run dev
 ```
 
 ---
@@ -71,11 +50,10 @@ npm run start
 
 | ფაილი | აღწერა |
 |--------|---------|
-| [`presentation.md`](./presentation.md) | სრული სალექციო მასალა სლაიდებად |
-| [`classwork.md`](./classwork.md) | საკლასო სამუშაოს ინსტრუქცია |
+| [`presentation.md`](./presentation.md) | სალექციო მასალა |
+| [`classwork.md`](./classwork.md) | საკლასო სამუშაო |
 | [`homework.md`](./homework.md) | საშინაო დავალება |
-| [`all-available-types.md`](./all-available-types.md) | TypeScript-ის ყველა ტიპის ცნობარი |
-| [`01_typescript.html`](./01_typescript.html) | TypeScript + HTML ინტეგრაციის დემო |
+| [`all-available-types.md`](./all-available-types.md) | TypeScript-ის ტიპების ცნობარი |
 
 ---
 

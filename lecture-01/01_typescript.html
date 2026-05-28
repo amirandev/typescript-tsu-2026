@@ -3,962 +3,368 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ლექცია 01: TypeScript-ის დაყენება და კონფიგურაცია</title>
-    <!-- Fonts -->
+    <title>ლექცია 01: TypeScript + React Vite-ით</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;700&family=Noto+Sans+Georgian:wght@400;500;700;900&display=swap" rel="stylesheet">
-    <!-- FontAwesome for Premium Tech Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
+
     <style>
         :root {
-            --bg-color: #0b0f19;
+            --bg: #0b0f19;
             --slide-bg: #111827;
-            --accent-blue: #3178c6;
-            --accent-cyan: #06b6d4;
-            --accent-green: #10b981;
-            --text-main: #f3f4f6;
-            --text-muted: #9ca3af;
+            --blue: #3178c6;
+            --cyan: #06b6d4;
+            --green: #10b981;
+            --text: #f3f4f6;
+            --muted: #9ca3af;
             --code-bg: #1f2937;
-            --border-color: #374151;
+            --border: #374151;
         }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            user-select: none;
-        }
-
+        * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
-            background-color: var(--bg-color);
-            color: var(--text-main);
+            background: var(--bg);
+            color: var(--text);
             font-family: 'Noto Sans Georgian', sans-serif;
             min-height: 100vh;
             display: flex;
-            flex-direction: column;
             justify-content: center;
             align-items: center;
             overflow: hidden;
         }
 
-        /* 16:9 Presentation Container */
-        .presentation-wrapper {
+        .wrapper {
             position: relative;
             width: 100%;
             max-width: 1280px;
             aspect-ratio: 16 / 9;
-            background-color: var(--slide-bg);
+            background: var(--slide-bg);
             border-radius: 16px;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-            border: 1px solid var(--border-color);
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,.5);
+            border: 1px solid var(--border);
             display: flex;
             flex-direction: column;
             overflow: hidden;
         }
 
-        /* Ambient Glow Behind Slides */
-        .glow {
-            position: absolute;
-            width: 400px;
-            height: 400px;
-            background: radial-gradient(circle, rgba(49, 120, 198, 0.15) 0%, rgba(0,0,0,0) 70%);
-            top: -100px;
-            right: -100px;
-            pointer-events: none;
-            z-index: 0;
-        }
+        .glow { position: absolute; width: 400px; height: 400px; background: radial-gradient(circle, rgba(49,120,198,.15) 0%, transparent 70%); top: -100px; right: -100px; pointer-events: none; z-index: 0; }
+        .glow-b { position: absolute; width: 300px; height: 300px; background: radial-gradient(circle, rgba(6,182,212,.1) 0%, transparent 70%); bottom: -50px; left: -50px; pointer-events: none; z-index: 0; }
 
-        .glow-bottom {
-            position: absolute;
-            width: 300px;
-            height: 300px;
-            background: radial-gradient(circle, rgba(6, 182, 212, 0.1) 0%, rgba(0,0,0,0) 70%);
-            bottom: -50px;
-            left: -50px;
-            pointer-events: none;
-            z-index: 0;
-        }
-
-        /* Slides Management */
-        .slides-container {
-            flex: 1;
-            position: relative;
-            z-index: 1;
-        }
-
+        .slides { flex: 1; position: relative; z-index: 1; }
         .slide {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            padding: 50px 80px;
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-start;
-            opacity: 0;
-            pointer-events: none;
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            padding: 50px 80px; display: flex; flex-direction: column;
+            opacity: 0; pointer-events: none;
             transform: translateX(50px);
-            transition: opacity 0.4s ease, transform 0.4s ease;
+            transition: opacity .4s, transform .4s;
         }
+        .slide.active { opacity: 1; pointer-events: auto; transform: translateX(0); }
+        .slide.prev { transform: translateX(-50px); }
 
-        .slide.active {
-            opacity: 1;
-            pointer-events: auto;
-            transform: translateX(0);
-        }
-
-        .slide.prev {
-            transform: translateX(-50px);
-        }
-
-        /* Typography */
-        h1.title {
-            font-size: 48px;
-            font-weight: 900;
-            background: linear-gradient(135deg, #60a5fa, #3178c6);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin-bottom: 10px;
-            line-height: 1.2;
-        }
-
+        h1.title { font-size: 48px; font-weight: 900; background: linear-gradient(135deg, #60a5fa, #3178c6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
         h2.section-title {
-            font-size: 38px;
-            color: var(--text-main);
-            border-bottom: 2px solid var(--accent-blue);
-            padding-bottom: 15px;
-            margin-bottom: 30px;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            font-weight: 700;
+            font-size: 34px; color: var(--text);
+            border-bottom: 2px solid var(--blue); padding-bottom: 12px; margin-bottom: 24px;
+            display: flex; align-items: center; gap: 12px; font-weight: 700;
         }
+        h2.section-title i { color: var(--blue); }
+        h3 { font-size: 20px; color: var(--cyan); margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+        p { font-size: 17px; line-height: 1.6; color: var(--text); margin-bottom: 14px; }
+        p strong { color: #38bdf8; }
 
-        h2.section-title i {
-            color: var(--accent-blue);
-        }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; height: 100%; align-items: start; }
 
-        h3 {
-            font-size: 22px;
-            color: var(--accent-cyan);
-            margin-bottom: 12px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
+        ul { list-style: none; margin-bottom: 12px; }
+        ul li { font-size: 17px; line-height: 1.6; margin-bottom: 10px; padding-left: 24px; position: relative; color: var(--text); }
+        ul li::before { content: "→"; position: absolute; left: 0; color: var(--blue); font-weight: bold; }
 
-        p {
-            font-size: 18px;
-            line-height: 1.6;
-            color: var(--text-main);
-            margin-bottom: 16px;
-        }
-
-        p strong {
-            color: #38bdf8;
-        }
-
-        /* Grid Layouts */
-        .grid-2 {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 40px;
-            height: 100%;
-            align-items: start;
-        }
-
-        /* Lists & Bullets */
-        ul {
-            list-style: none;
-            margin-bottom: 15px;
-        }
-
-        ul li {
-            font-size: 18px;
-            line-height: 1.6;
-            margin-bottom: 12px;
-            position: relative;
-            padding-left: 28px;
-            color: var(--text-main);
-        }
-
-        ul li::before {
-            content: "→";
-            position: absolute;
-            left: 0;
-            color: var(--accent-blue);
-            font-weight: bold;
-        }
-
-        ul.bullets-star li::before {
-            content: "✦";
-            color: var(--accent-cyan);
-        }
-
-        /* Cards & Tiles */
         .card {
-            background-color: var(--code-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 24px;
-            margin-bottom: 15px;
-            position: relative;
-            overflow: hidden;
+            background: var(--code-bg); border: 1px solid var(--border);
+            border-radius: 12px; padding: 20px; margin-bottom: 12px;
+            position: relative; overflow: hidden;
         }
+        .card::before { content: ''; position: absolute; left: 0; top: 0; height: 100%; width: 4px; background: var(--blue); }
+        .card-cyan::before { background: var(--cyan); }
 
-        .card::before {
-            content: '';
-            position: absolute;
-            left: 0;
-            top: 0;
-            height: 100%;
-            width: 4px;
-            background-color: var(--accent-blue);
-        }
-
-        .card-cyan::before {
-            background-color: var(--accent-cyan);
-        }
-
-        /* Code Blocks */
         pre {
-            background-color: #0d1117;
-            border: 1px solid var(--border-color);
-            border-radius: 10px;
-            padding: 16px 20px;
-            overflow-x: auto;
-            margin: 10px 0 20px 0;
+            background: #0d1117; border: 1px solid var(--border);
+            border-radius: 10px; padding: 14px 18px; margin: 8px 0 16px 0; overflow-x: auto;
         }
+        code { font-family: 'Fira Code', monospace; font-size: 14px; color: #e2e8f0; line-height: 1.5; }
+        .ic { background: var(--code-bg); padding: 2px 6px; border-radius: 4px; color: #f43f5e; font-family: 'Fira Code', monospace; font-size: .9em; }
 
-        code {
-            font-family: 'Fira Code', monospace;
-            font-size: 15px;
-            color: #e2e8f0;
-            line-height: 1.5;
-        }
+        .scrollable-content { overflow-y: auto; flex: 1; padding-right: 10px; }
+        .scrollable-content::-webkit-scrollbar { width: 6px; }
+        .scrollable-content::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
 
-        .inline-code {
-            background-color: var(--code-bg);
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-size: 0.9em;
-            color: #f43f5e;
-            font-family: 'Fira Code', monospace;
-        }
-
-        /* Mathematical Formula Display */
-        .formula-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background: linear-gradient(90deg, rgba(49, 120, 198, 0.1) 0%, rgba(6, 182, 212, 0.1) 100%);
-            border: 1px dashed var(--accent-blue);
-            padding: 15px;
-            border-radius: 8px;
-            font-family: 'Fira Code', monospace;
-            font-size: 20px;
-            font-weight: bold;
-            color: var(--text-main);
-            margin: 15px 0;
-        }
-
-        /* Link buttons */
-        .link-btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            color: var(--accent-cyan);
-            text-decoration: none;
-            font-weight: bold;
-            margin-bottom: 10px;
-            font-size: 16px;
-            transition: color 0.2s;
-        }
-
-        .link-btn:hover {
-            color: var(--text-main);
-        }
-
-        /* Tables */
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 15px;
-            background-color: var(--code-bg);
-            border-radius: 8px;
-            overflow: hidden;
-            border: 1px solid var(--border-color);
-        }
-
-        th, td {
-            padding: 12px 20px;
-            text-align: left;
-            font-size: 16px;
-        }
-
-        th {
-            background-color: var(--accent-blue);
-            color: #fff;
-            font-weight: 700;
-        }
-
-        tr:not(:last-child) {
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        /* Presentation controls */
-        .controls-bar {
-            background-color: #0d111a;
-            border-top: 1px solid var(--border-color);
-            padding: 15px 30px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            z-index: 10;
-        }
-
-        .control-btn {
-            background: transparent;
-            border: none;
-            color: var(--text-muted);
-            font-size: 20px;
-            cursor: pointer;
-            padding: 8px 16px;
-            border-radius: 6px;
-            transition: background-color 0.2s, color 0.2s;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .control-btn:hover {
-            background-color: var(--code-bg);
-            color: var(--text-main);
-        }
-
-        .slide-indicator {
-            font-size: 14px;
-            color: var(--text-muted);
-            letter-spacing: 1px;
-            font-weight: 500;
-        }
-
-        /* Progress Bar */
-        .progress-container {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 4px;
-            background-color: #1e293b;
-            z-index: 15;
-        }
-
-        .progress-bar {
-            height: 100%;
-            width: 0%;
-            background: linear-gradient(90deg, var(--accent-blue), var(--accent-cyan));
-            transition: width 0.3s ease;
-        }
-
-        /* Helper Styles */
-        .scrollable-content {
-            overflow-y: auto;
-            flex: 1;
-            padding-right: 10px;
-        }
-
-        .scrollable-content::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        .scrollable-content::-webkit-scrollbar-thumb {
-            background: var(--border-color);
-            border-radius: 4px;
-        }
-
-        /* Title Slide styling */
-        .title-slide {
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-        }
-
-        .title-slide h1 {
-            font-size: 54px;
-            margin-bottom: 25px;
-            line-height: 1.25;
-            letter-spacing: -1px;
-        }
-
-        .subtitle {
-            font-size: 22px;
-            color: var(--accent-cyan);
-            margin-bottom: 40px;
-            font-weight: 500;
-        }
-
-        .authorship {
-            font-size: 16px;
-            color: var(--text-muted);
-            border-top: 1px solid var(--border-color);
-            padding-top: 20px;
-            display: inline-block;
-        }
+        .title-slide { justify-content: center; align-items: center; text-align: center; }
+        .title-slide h1 { font-size: 52px; margin-bottom: 20px; }
+        .sub { font-size: 20px; color: var(--cyan); margin-bottom: 30px; font-weight: 500; }
 
         .badge {
-            background-color: rgba(49, 120, 198, 0.2);
-            color: var(--accent-blue);
-            border: 1px solid rgba(49, 120, 198, 0.4);
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 14px;
-            font-weight: bold;
-            display: inline-block;
-            margin-bottom: 20px;
+            background: rgba(49,120,198,.2); color: var(--blue);
+            border: 1px solid rgba(49,120,198,.4); padding: 4px 12px;
+            border-radius: 20px; font-size: 14px; font-weight: bold;
+            display: inline-block; margin-bottom: 20px;
         }
+
+        .controls {
+            background: #0d111a; border-top: 1px solid var(--border);
+            padding: 12px 30px; display: flex; justify-content: space-between;
+            align-items: center; z-index: 10;
+        }
+        .ctrl-btn {
+            background: transparent; border: none; color: var(--muted);
+            font-size: 18px; cursor: pointer; padding: 6px 14px;
+            border-radius: 6px; transition: background .2s, color .2s;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .ctrl-btn:hover { background: var(--code-bg); color: var(--text); }
+        .indicator { font-size: 14px; color: var(--muted); }
+
+        .progress-wrap { position: absolute; bottom: 0; left: 0; width: 100%; height: 4px; background: #1e293b; z-index: 15; }
+        .progress-bar { height: 100%; width: 0%; background: linear-gradient(90deg, var(--blue), var(--cyan)); transition: width .3s; }
+
+        table { width: 100%; border-collapse: collapse; margin-top: 12px; background: var(--code-bg); border-radius: 8px; overflow: hidden; border: 1px solid var(--border); }
+        th, td { padding: 10px 16px; text-align: left; font-size: 15px; }
+        th { background: var(--blue); color: #fff; font-weight: 700; }
+        tr:not(:last-child) { border-bottom: 1px solid var(--border); }
     </style>
 </head>
 <body>
 
-    <div class="presentation-wrapper">
-        <!-- Ambient Light Elements -->
-        <div class="glow"></div>
-        <div class="glow-bottom"></div>
+<div class="wrapper">
+    <div class="glow"></div>
+    <div class="glow-b"></div>
 
-        <!-- Slides Container -->
-        <div class="slides-container">
+    <div class="slides">
 
-            <!-- Title Slide & Learning Objectives (Combined beautifully or sequential) -->
-            <div class="slide active title-slide" id="slide-0">
-                <span class="badge">ლექცია 01</span>
-                <h1 class="title">TypeScript-ის დაყენება და კონფიგურაცია</h1>
-                <p class="subtitle">პირველი ნაბიჯები თანამედროვე ტიპიზირებული კოდის სამყაროში</p>
-                <div class="authorship">
-                    <p style="margin-bottom: 5px;"><strong>სასწავლო მიზნები:</strong></p>
-                    <p style="font-size: 15px; color: var(--text-muted);">
-                        TypeScript-ის არსი • გარემოს მომზადება • tsconfig.json • პირველი პროექტი • Watch რეჟიმი
-                    </p>
-                </div>
-            </div>
+        <!-- Slide 0: Title -->
+        <div class="slide active title-slide" id="s0">
+            <span class="badge">ლექცია 01</span>
+            <h1 class="title">TypeScript საფუძვლები<br>+ React Vite-ით</h1>
+            <p class="sub">პირველი ნაბიჯები TypeScript-ში</p>
+        </div>
 
-            <!-- Slide 0.5: სასწავლო მიზნები -->
-            <div class="slide" id="slide-1">
-                <h2 class="section-title"><i class="fa-solid fa-bullseye"></i> სასწავლო მიზნები</h2>
-                <div class="content-area grid-2">
-                    <div class="card">
-                        <h3>რა არის მთავარი ამოცანა?</h3>
-                        <p>ამ ლექციის განმავლობაში ჩვენ სრულად გავივლით TypeScript-ის სამუშაო გარემოს ინსტალაციის, გამართვისა და კონფიგურაციის სრულ ციკლს.</p>
-                        <p>მზად ვიქნებით რეალური პროექტების ასაწყობად.</p>
+        <!-- Slide 1: What is TypeScript -->
+        <div class="slide" id="s1">
+            <h2 class="section-title"><i class="fa-solid fa-circle-question"></i> რა არის TypeScript?</h2>
+            <div class="grid-2">
+                <div>
+                    <p><strong>TypeScript</strong> არის JavaScript-ის გაფართოება, რომელიც ამატებს <strong>ტიპებს</strong> (types).</p>
+                    <div style="display:flex;justify-content:center;align-items:center;background:linear-gradient(90deg,rgba(49,120,198,.1),rgba(6,182,212,.1));border:1px dashed var(--blue);padding:14px;border-radius:8px;font-family:'Fira Code',monospace;font-size:18px;font-weight:bold;margin:16px 0;">
+                        JavaScript + ტიპები = TypeScript
                     </div>
-                    <div>
-                        <ul class="bullets-star" style="margin-top: 10px;">
-                            <li>გავიგოთ რა არის TypeScript და რატომ გამოვიყენოთ</li>
-                            <li>დავაყენოთ TypeScript გარემო (Node.js, npm, tsc)</li>
-                            <li>გავეცნოთ <span class="inline-code">tsconfig.json</span> კონფიგურაციას</li>
-                            <li>ავაწყოთ პირველი TypeScript პროექტი</li>
-                            <li>ვისწავლოთ კომპილაცია და watch რეჟიმი</li>
+                    <p style="font-size:15px;color:var(--muted);">TypeScript კოდი კომპილირდება JavaScript-ში — მუშაობს ნებისმიერ ბრაუზერსა და Node.js-ზე.</p>
+                </div>
+                <div>
+                    <div class="card card-cyan" style="padding:14px 18px;">
+                        <h3 style="font-size:17px;"><i class="fa-solid fa-star"></i> მთავარი უპირატესობები</h3>
+                        <ul style="margin:8px 0 0 0;">
+                            <li style="font-size:14px;margin-bottom:6px;">🛡 <strong>შეცდომების გამოვლენა</strong> — წერის დროს, გაშვებამდე</li>
+                            <li style="font-size:14px;margin-bottom:6px;">💡 <strong>უკეთესი IDE</strong> — ავტოშევსება, IntelliSense</li>
+                            <li style="font-size:14px;margin-bottom:6px;">📖 <strong>თვითდოკუმენტირება</strong> — ტიპები ხსნის კოდს</li>
                         </ul>
                     </div>
                 </div>
             </div>
+        </div>
 
-            <!-- Slide 1: რა არის TypeScript? -->
-            <div class="slide" id="slide-2">
-                <h2 class="section-title"><i class="fa-solid fa-circle-question"></i> სლაიდი 1: რა არის TypeScript?</h2>
-                <div class="scrollable-content grid-2">
-                    <div>
-                        <p><strong>TypeScript</strong> არის JavaScript-ის სუპერსეტი — ენა, რომელიც აფართოებს JavaScript-ს <strong>სტატიკური ტიპების</strong> მხარდაჭერით.</p>
-                        <div class="formula-container">
-                            JavaScript  +  ტიპები  =  TypeScript
-                        </div>
-                        <p><strong>რატომ არის საჭირო TypeScript?</strong></p>
-                        <p style="font-size: 16px;">წარმოიდგინეთ, წერთ JavaScript კოდს და ხშირად ხვდებით შეცდომებს, რომლებიც მხოლოდ გაშვებისას ვლინდება. TypeScript ამ პრობლემას წყვეტს — ის შეცდომებს პოულობს <strong>კოდის აწყობისას (compile-time)</strong>, სანამ კოდი მომხმარებლამდე მივა.</p>
+        <!-- Slide 2: Playground -->
+        <div class="slide" id="s2">
+            <h2 class="section-title"><i class="fa-solid fa-flask"></i> სცადე TypeScript ბრაუზერშივე</h2>
+            <div class="grid-2">
+                <div>
+                    <div class="card" style="padding:14px;">
+                        <h3 style="font-size:17px;">🎮 TypeScript Playground</h3>
+                        <a style="color:var(--cyan);font-size:14px;" href="https://www.typescriptlang.org/play/" target="_blank">https://www.typescriptlang.org/play/</a>
                     </div>
-                    <div>
-                        <div class="card card-cyan" style="padding: 15px 20px;">
-                            <h3 style="font-size: 18px;"><i class="fa-solid fa-star"></i> მთავარი უპირატესობები:</h3>
-                            <ul style="margin: 10px 0 0 0;">
-                                <li style="font-size: 15px; margin-bottom: 8px;">🛡 <strong>შეცდომების გამოვლენა</strong> — ტიპების შემოწმება ხდება კომპილაციის დროს</li>
-                                <li style="font-size: 15px; margin-bottom: 8px;">💡 <strong>უკეთესი IDE მხარდაჭერა</strong> — ავტოშევსება, რეფაქტორინგი, IntelliSense</li>
-                                <li style="font-size: 15px; margin-bottom: 8px;">📖 <strong>თვითდოკუმენტირება</strong> — კოდის კითხვისას ტიპები გვეუბნება რას ელოდება ფუნქცია</li>
-                                <li style="font-size: 15px; margin-bottom: 8px;">🔒 <strong>უფრო უსაფრთხო კოდი</strong> — ნაკლები bug-ები, უფრო პროგნოზირებადი ქცევა</li>
-                            </ul>
-                        </div>
-                        <p style="font-size: 15px; color: var(--text-muted); margin-top: 10px;">
-                            <strong>TypeScript ≠ ახალი ენა!</strong><br>
-                            TypeScript კოდი კომპილირდება ჩვეულებრივ JavaScript-ში, რომელიც მუშაობს ნებისმიერ ბრაუზერსა და Node.js-ზე.
-                        </p>
+                    <div class="card card-cyan" style="padding:14px;">
+                        <h3 style="font-size:17px;">🎮 PlayCode.io</h3>
+                        <a style="color:var(--cyan);font-size:14px;" href="https://playcode.io/typescript" target="_blank">https://playcode.io/typescript</a>
                     </div>
                 </div>
-            </div>
-
-            <!-- Slide 2: Playground -->
-            <div class="slide" id="slide-3">
-                <h2 class="section-title"><i class="fa-solid fa-flask"></i> სლაიდი 2: სცადე TypeScript ბრაუზერშივე — Playground</h2>
-                <div class="scrollable-content grid-2">
-                    <div>
-                        <p>TypeScript-ის გასინჯვა არაფრის დაყენებას არ საჭიროებს! არსებობს ონლაინ ინსტრუმენტები:</p>
-                        
-                        <div class="card" style="padding: 15px; margin-bottom: 12px;">
-                            <h3 style="font-size: 18px;">🎮 TypeScript Playground (ოფიციალური)</h3>
-                            <a class="link-btn" href="https://www.typescriptlang.org/play/" target="_blank">https://www.typescriptlang.org/play/ <i class="fa-solid fa-up-right-from-square"></i></a>
-                            <ul style="margin: 5px 0 0 0;">
-                                <li style="font-size: 14px; margin-bottom: 3px;">მაიკროსოფტის ოფიციალური ინსტრუმენტი</li>
-                                <li style="font-size: 14px; margin-bottom: 3px;">რეალურ დროში აჩვენებს კომპილირებულ JavaScript-ს</li>
-                                <li style="font-size: 14px; margin-bottom: 3px;">შეგიძლიათ სხვადასხვა tsconfig ოფციების ტესტირება და გაზიარება</li>
-                            </ul>
-                        </div>
-                    </div>
-                    <div>
-                        <div class="card card-cyan" style="padding: 15px; margin-bottom: 12px;">
-                            <h3 style="font-size: 18px;">🎮 PlayCode.io TypeScript</h3>
-                            <a class="link-btn" href="https://playcode.io/typescript" target="_blank">https://playcode.io/typescript <i class="fa-solid fa-up-right-from-square"></i></a>
-                            <ul style="margin: 5px 0 0 0;">
-                                <li style="font-size: 14px; margin-bottom: 3px;">მარტივი და სწრაფი ინტერფეისი</li>
-                                <li style="font-size: 14px; margin-bottom: 3px;">ავტომატურად ასრულებს კოდს და აჩვენებს console.log-ს</li>
-                            </ul>
-                        </div>
-                        <p style="font-size: 15px; margin-bottom: 5px;"><strong>დავალება:</strong> გახსენით Playground და სცადეთ:</p>
-                        <pre style="padding: 10px; margin: 0;"><code class="language-typescript">let message: string = "Hello TypeScript!";
-console.log(message);</code></pre>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Slide 3: Node.js & npm -->
-            <div class="slide" id="slide-4">
-                <h2 class="section-title"><i class="fa-solid fa-download"></i> სლაიდი 3: Node.js და npm-ის ინსტალაცია</h2>
-                <div class="scrollable-content grid-2">
-                    <div>
-                        <p><strong>Node.js</strong> — JavaScript-ის runtime გარემო, რომელიც საშუალებას გვაძლევს გავუშვათ JavaScript სერვერის გარეშე.</p>
-                        <p><strong>npm (Node Package Manager)</strong> — პაკეტების მენეჯერი, რომელსაც ვიყენებთ TypeScript-ის დასაყენებლად.</p>
-                        
-                        <p style="margin-top: 15px;"><strong>ინსტალაციის ნაბიჯები:</strong></p>
-                        <ol style="margin-left: 20px; color: var(--text-main); font-size: 16px; line-height: 1.6;">
-                            <li>გადადით საიტზე: <a href="https://nodejs.org" target="_blank" style="color: var(--accent-cyan);">https://nodejs.org</a></li>
-                            <li>ჩამოტვირთეთ LTS ვერსია (რეკომენდებული)</li>
-                            <li>გაუშვით ინსტალატორი — ის ავტომატურად დააყენებს ორივეს</li>
-                        </ol>
-                    </div>
-                    <div>
-                        <h3 style="font-size: 18px;"><i class="fa-solid fa-terminal"></i> ვერიფიკაცია ტერმინალში:</h3>
-                        <pre><code class="language-bash">node --version   # მაგ: v20.11.0
-npm --version    # მაგ: 10.2.4</code></pre>
-
-                        <h3 style="font-size: 18px; margin-top: 15px;"><i class="fa-solid fa-laptop"></i> პლატფორმული ალტერნატივები:</h3>
-                        <p style="font-size: 14px; margin-bottom: 5px;">Windows (<span class="inline-code">winget</span>):</p>
-                        <pre style="padding: 6px 12px; margin: 0 0 10px 0;"><code class="language-bash">winget install OpenJS.NodeJS.LTS</code></pre>
-                        
-                        <p style="font-size: 14px; margin-bottom: 5px;">macOS (Homebrew):</p>
-                        <pre style="padding: 6px 12px; margin: 0 0 10px 0;"><code class="language-bash">brew install node</code></pre>
-
-                        <p style="font-size: 14px; margin-bottom: 5px;">Linux (Ubuntu/Debian):</p>
-                        <pre style="padding: 6px 12px; margin: 0;"><code class="language-bash">sudo apt update && sudo apt install nodejs npm</code></pre>
-
-                        <p style="font-size: 13px; color: var(--accent-cyan); margin-top: 10px;">💡 <strong>შენიშვნა:</strong> ინსტალაციის შემდეგ გადატვირთეთ ტერმინალი.</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Slide 4: TypeScript Installation -->
-            <div class="slide" id="slide-5">
-                <h2 class="section-title"><i class="fa-solid fa-square-plus"></i> სლაიდი 4: TypeScript-ის ინსტალაცია</h2>
-                <div class="scrollable-content">
-                    <p style="margin-bottom: 20px;"><strong>წინაპირობა:</strong> Node.js და npm უნდა იყოს წარმატებით დაყენებული სისტემაში.</p>
-                    <div class="grid-2">
-                        <div>
-                            <div class="card">
-                                <h3>ნაბიჯი 1: ვერსიების შემოწმება</h3>
-                                <p style="font-size: 15px;">დარწმუნდით, რომ Node-ის გარემო აქტიურია:</p>
-                                <pre style="margin: 5px 0 0 0;"><code class="language-bash">node --version
-npm --version</code></pre>
-                            </div>
-                            <div class="card card-cyan">
-                                <h3>ნაბიჯი 2: პროექტის შექმნა</h3>
-                                <p style="font-size: 15px;">შექმენით ახალი საქაღალდე და გააკეთეთ npm ინიციალიზაცია:</p>
-                                <pre style="margin: 5px 0 0 0;"><code class="language-bash">mkdir my-ts-project
-cd my-ts-project
-npm init -y</code></pre>
-                            </div>
-                        </div>
-                        <div>
-                            <div class="card" style="height: 100%;">
-                                <h3>ნაბიჯი 3: TypeScript-ის ინსტალაცია</h3>
-                                <p>ჩვენ ვაყენებთ TypeScript-ს როგორც დეველოპმენტ პაკეტს (devDependency):</p>
-                                <pre style="margin: 15px 0;"><code class="language-bash">npm install typescript --save-dev</code></pre>
-                                <p style="font-size: 15px; color: var(--text-muted);">ეს ბრძანება პროექტში დაამატებს TypeScript კომპილერს, რომლის გაშვებასაც შევძლებთ <span class="inline-code">npx tsc</span>-ის მეშვეობით.</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Slide 5: tsconfig.json -->
-            <div class="slide" id="slide-6">
-                <h2 class="section-title"><i class="fa-solid fa-sliders"></i> სლაიდი 5: tsconfig.json - კონფიგურაცია</h2>
-                <div class="scrollable-content grid-2">
-                    <div>
-                        <p>TypeScript-ის ქცევის მართვისთვის საჭიროა კონფიგურაციის ფაილის გენერირება:</p>
-                        <pre><code class="language-bash"># tsconfig.json-ის გენერაცია
-npx tsc --init</code></pre>
-                        <p style="font-size: 15px; margin-top: 15px;">ეს ბრძანება შექმნის ფაილს, სადაც შეგვიძლია მივუთითოთ კომპილატორის სხვადასხვა ოფციები, სამიზნე ვერსიები და საქაღალდეების სტრუქტურა.</p>
-                        <div class="card card-cyan" style="margin-top: 15px; padding: 15px;">
-                            <p style="font-size: 14px; margin-bottom: 0;"><strong>სად იქმნება ფაილი?</strong> ის იქმნება პროექტის ძირეულ (root) დირექტორიაში, სადაც <span class="inline-code">package.json</span> მდებარეობს.</p>
-                        </div>
-                    </div>
-                    <div>
-                        <h3 style="font-size: 18px;"><i class="fa-solid fa-file-code"></i> მთავარი ოფციები tsconfig.json-ში:</h3>
-                        <pre style="margin: 5px 0; font-size: 13px;"><code class="language-json">{
-  "compilerOptions": {
-    "target": "ES2020",
-    "module": "ESNext",
-    "rootDir": "./src",
-    "outDir": "./dist",
-    "strict": true,
-    "esModuleInterop": true,
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true
-  }
-}</code></pre>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Slide 6: Project Structure -->
-            <div class="slide" id="slide-7">
-                <h2 class="section-title"><i class="fa-solid fa-sitemap"></i> სლაიდი 6: პროექტის სტრუქტურა</h2>
-                <div class="scrollable-content grid-2">
-                    <div>
-                        <p>სწორად ორგანიზებული პროექტის საქაღალდეების სტრუქტურა ასე გამოიყურება:</p>
-                        <pre style="font-size: 14px; line-height: 1.4;"><code class="language-plaintext">my-ts-project/
-├── src/              # წყაროს კოდი (.ts ფაილები)
-│   └── index.ts
-├── dist/             # კომპილირებული კოდი (.js ფაილები)
-│   └── index.js
-├── node_modules/
-├── package.json
-└── tsconfig.json</code></pre>
-                    </div>
-                    <div>
-                        <div class="card" style="margin-bottom: 12px;">
-                            <h3><i class="fa-regular fa-folder-open" style="color: var(--accent-cyan)"></i> src/ საქაღალდე</h3>
-                            <p style="font-size: 15px; margin-bottom: 0;">აქ ვწერთ ჩვენს ორიგინალ TypeScript (.ts) ფაილებს.</p>
-                        </div>
-                        <div class="card card-cyan">
-                            <h3><i class="fa-regular fa-folder-open" style="color: var(--accent-blue)"></i> dist/ საქაღალდე</h3>
-                            <p style="font-size: 15px; margin-bottom: 0;">აქ ავტომატურად გენერირდება კომპილირებული JavaScript (.js) ფაილები მას შემდეგ, რაც გავუშვებთ კომპილატორს.</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Slide 7: First TS Code -->
-            <div class="slide" id="slide-8">
-                <h2 class="section-title"><i class="fa-solid fa-keyboard"></i> სლაიდი 7: პირველი TypeScript კოდი</h2>
-                <div class="scrollable-content grid-2">
-                    <div>
-                        <h3 style="font-size: 18px;"><i class="fa-solid fa-file-pen"></i> src/index.ts</h3>
-                        <pre style="margin-top: 5px;"><code class="language-typescript">let message: string = "Hello TypeScript!";
+                <div>
+                    <p><strong>სცადეთ:</strong></p>
+                    <pre style="padding:10px;font-size:13px;"><code>let message: string = "Hello TypeScript!";
 console.log(message);
 
-function greet(name: string): string {
+let age: number = 25;
+let isStudent: boolean = true;
+
+console.log(`სახელი: ${message}, ასაკი: ${age}`);</code></pre>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 3: Basic Types -->
+        <div class="slide" id="s3">
+            <h2 class="section-title"><i class="fa-solid fa-list"></i> ძირითადი ტიპები</h2>
+            <div class="grid-2">
+                <div>
+                    <table>
+                        <thead><tr><th>ტიპი</th><th>მაგალითი</th></tr></thead>
+                        <tbody>
+                            <tr><td><code>string</code></td><td><code>let name: string = "ნიკა"</code></td></tr>
+                            <tr><td><code>number</code></td><td><code>let age: number = 25</code></td></tr>
+                            <tr><td><code>boolean</code></td><td><code>let isActive: boolean = true</code></td></tr>
+                            <tr><td><code>string[]</code></td><td><code>let names: string[] = ["ა","ბ"]</code></td></tr>
+                            <tr><td><code>number[]</code></td><td><code>let nums: number[] = [1,2,3]</code></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div>
+                    <h3 style="font-size:17px;">ფუნქციები ტიპებით</h3>
+                    <pre style="padding:10px;font-size:13px;"><code>function greet(name: string): string {
   return `გამარჯობა, ${name}!`;
 }
 
-console.log(greet("ნინო"));</code></pre>
-                    </div>
-                    <div>
-                        <h3 style="font-size: 18px;"><i class="fa-solid fa-gears"></i> კომპილაცია და გაშვება</h3>
-                        <p style="font-size: 16px;">ტრიგერისთვის ტერმინალში გაუშვით შემდეგი ბრძანებები:</p>
-                        
-                        <div class="card" style="padding: 15px; margin-bottom: 15px;">
-                            <p style="font-size: 15px; margin-bottom: 5px;"><strong>1. კომპილაცია:</strong></p>
-                            <pre style="margin: 0; padding: 10px;"><code class="language-bash">npx tsc</code></pre>
-                        </div>
+function add(a: number, b: number): number {
+  return a + b;
+}
 
-                        <div class="card card-cyan" style="padding: 15px; margin-bottom: 0;">
-                            <p style="font-size: 15px; margin-bottom: 5px;"><strong>2. გაშვება:</strong></p>
-                            <pre style="margin: 0; padding: 10px;"><code class="language-bash">node dist/index.js</code></pre>
-                        </div>
+console.log(greet("ნინო"));
+console.log(add(5, 3));</code></pre>
+                    <p style="font-size:14px;color:var(--cyan);">💡 ითამაშეთ Playground-ში!</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 4: Vite + React + TS -->
+        <div class="slide" id="s4">
+            <h2 class="section-title"><i class="fa-solid fa-bolt"></i> Vite + React + TypeScript</h2>
+            <div class="grid-2">
+                <div>
+                    <p><strong>Vite</strong> — თანამედროვე build ინსტრუმენტი. ქმნის პროექტს წამებში.</p>
+                    <pre style="font-size:13px;"><code># შექმენით პროექტი
+npx create-vite@latest my-ts-app
+  --template react-ts
+
+cd my-ts-app
+npm install
+npm run dev</code></pre>
+                </div>
+                <div>
+                    <div class="card" style="height:100%;">
+                        <h3 style="font-size:17px;">რას ვიღებთ?</h3>
+                        <ul>
+                            <li>React + TypeScript მზა კონფიგურაციით</li>
+                            <li>HMR — ცვლილებები მაშინვე ჩანს</li>
+                            <li>tsconfig.json უკვე კონფიგურირებულია</li>
+                            <li>ESLint + Vite</li>
+                        </ul>
                     </div>
                 </div>
             </div>
+        </div>
 
-            <!-- Slide 8: HTML Integration -->
-            <div class="slide" id="slide-9">
-                <h2 class="section-title"><i class="fa-solid fa-code"></i> სლაიდი 8: HTML-თან ინტეგრაცია</h2>
-                <div class="scrollable-content grid-2">
-                    <div>
-                        <p>თუ გსურთ კოდი ბრაუზერში გაუშვათ, შექმენით <span class="inline-code">index.html</span> ფაილი პროექტის ძირეულ საქაღალდეში:</p>
-                        <pre style="font-size: 13px; margin-top: 5px;"><code class="language-html">&lt;!DOCTYPE html&gt;
-&lt;html lang="ka"&gt;
-<span style="color: var(--accent-cyan);">&lt;head&gt;
-  &lt;meta charset="UTF-8" /&gt;
-  &lt;title&gt;TypeScript App&lt;/title&gt;
-&lt;/head&gt;</span>
-&lt;body&gt;
-  &lt;div id="app"&gt;&lt;/div&gt;
-  <span style="color: #f43f5e;">&lt;script type="module" src="dist/index.js"&gt;&lt;/script&gt;</span>
-&lt;/body&gt;
-&lt;/html&gt;</code></pre>
-                    </div>
-                    <div>
-                        <div class="card card-cyan" style="height: 100%; display: flex; flex-direction: column; justify-content: center;">
-                            <h3><i class="fa-solid fa-circle-info"></i> უმნიშვნელოვანესი დეტალი:</h3>
-                            <p style="font-size: 16px; margin-top: 10px;"><strong>tsconfig.json-ში:</strong></p>
-                            <p style="font-size: 15px;">დააკონფიგურირეთ <span class="inline-code">"module": "ESNext"</span> რათა ბრაუზერში <span class="inline-code">type="module"</span>-მა გამართულად იმუშაოს.</p>
-                            <p style="font-size: 14px; color: var(--text-muted); margin-top: 15px;">ბრაუზერი პირდაპირ ვერ კითხულობს TypeScript ფაილებს, ამიტომ ჩვენ მას ყოველთვის ვაწვდით კომპილირებულ <span class="inline-code">dist/index.js</span> ფაილს.</p>
-                        </div>
-                    </div>
+        <!-- Slide 5: TypeScript in React -->
+        <div class="slide" id="s5">
+            <h2 class="section-title"><i class="fa-solid fa-code"></i> TypeScript React-ში</h2>
+            <div class="grid-2">
+                <div>
+                    <h3 style="font-size:16px;">src/App.tsx</h3>
+                    <pre style="padding:10px;font-size:12px;"><code>function App(): JSX.Element {
+  const title: string = "Hello TS!";
+  const year: number = 2026;
+
+  return (
+    &lt;div style={{textAlign:"center"}}&gt;
+      &lt;h1&gt;{title}&lt;/h1&gt;
+      &lt;p&gt;წელი: {year}&lt;/p&gt;
+    &lt;/div&gt;
+  );
+}
+
+export default App;</code></pre>
                 </div>
-            </div>
+                <div>
+                    <h3 style="font-size:16px;">კომპონენტი Props-ით</h3>
+                    <pre style="padding:10px;font-size:12px;"><code>interface GreetingProps {
+  name: string;
+  age: number;
+}
 
-            <!-- Slide 9: Watch Mode -->
-            <div class="slide" id="slide-10">
-                <h2 class="section-title"><i class="fa-solid fa-eye"></i> სლაიდი 9: Watch რეჟიმი</h2>
-                <div class="scrollable-content grid-2">
-                    <div>
-                        <p>ყოველ ჯერზე ფაილის ცვლილებისას <span class="inline-code">npx tsc</span>-ის ხელით წერა დამღლელია. ამისთვის არსებობს <strong>Watch</strong> რეჟიმი.</p>
-                        <p>ავტომატური კომპილაცია ფაილების ცვლილებისას:</p>
-                        <pre style="font-size: 20px; text-align: center; margin: 20px 0;"><code class="language-bash">npx tsc -w</code></pre>
-                    </div>
-                    <div>
-                        <div class="card" style="height: 100%;">
-                            <h3>როგორ მუშაობს იგი?</h3>
-                            <ul style="margin-top: 15px;">
-                                <li><strong>Watch რეჟიმი</strong> გამუდმებით თვალყურს ადევნებს <span class="inline-code">.ts</span> ფაილებს.</li>
-                                <li>ნებისმიერი ცვლილების შენახვისთანავე (Ctrl+S / Cmd+S), ის მომენტალურად ახდენს კომპილაციას ფონურ რეჟიმში.</li>
-                                <li>ეკრანზე მაშინვე გამოჩნდება შეცდომები, თუკი ისინი არსებობს.</li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Slide 10: npm Scripts -->
-            <div class="slide" id="slide-11">
-                <h2 class="section-title"><i class="fa-solid fa-scroll"></i> სლაიდი 10: npm Scripts</h2>
-                <div class="scrollable-content grid-2">
-                    <div>
-                        <p><strong>package.json</strong>-ში სკრიპტების დამატება გვეხმარება მარტივად გავუშვათ ხშირი ბრძანებები:</p>
-                        <pre style="font-size: 13px; margin-top: 5px;"><code class="language-json">{
-  "scripts": {
-    "build": "npx tsc",
-    "start": "node dist/index.js",
-    "dev": "npx tsc -w",
-    "build:start": "npx tsc && node dist/index.js"
-  }
+function Greeting({ name, age }
+    : GreetingProps): JSX.Element {
+  return (
+    &lt;div&gt;
+      &lt;h2&gt;გამარჯობა, {name}!&lt;/h2&gt;
+      &lt;p&gt;ასაკი: {age}&lt;/p&gt;
+    &lt;/div&gt;
+  );
 }</code></pre>
-                    </div>
-                    <div>
-                        <h3 style="font-size: 18px;"><i class="fa-solid fa-play"></i> როგორ გამოვიყენოთ:</h3>
-                        <p style="font-size: 15px; margin-bottom: 10px;">პროექტის ასაწყობად:</p>
-                        <pre style="padding: 10px 15px; margin: 0 0 15px 0;"><code class="language-bash">npm run build</code></pre>
-
-                        <p style="font-size: 15px; margin-bottom: 10px;">პროექტის გასაშვებად:</p>
-                        <pre style="padding: 10px 15px; margin: 0 0 15px 0;"><code class="language-bash">npm run start</code></pre>
-
-                        <p style="font-size: 15px; margin-bottom: 10px;">დეველოპმენტ (watch) რეჟიმისთვის:</p>
-                        <pre style="padding: 10px 15px; margin: 0;"><code class="language-bash">npm run dev</code></pre>
-                    </div>
                 </div>
             </div>
-
-            <!-- Slide 11: strict Mode -->
-            <div class="slide" id="slide-12">
-                <h2 class="section-title"><i class="fa-solid fa-circle-exclamation"></i> სლაიდი 11: strict რეჟიმი</h2>
-                <div class="scrollable-content">
-                    <p style="margin-bottom: 15px;"><span class="inline-code">strict: true</span> ჩართავს ყველა მკაცრი ტიპების შემოწმების ოფციას. ეს არის საუკეთესო პრაქტიკა უსაფრთხო კოდისთვის:</p>
-                    
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>ოფცია</th>
-                                <th>აღწერა</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td><code>strictNullChecks</code></td>
-                                <td>null/undefined-ის მკაცრი შემოწმება (არ გვაძლევს საშუალებას შემთხვევით წავიკითხოთ ცარიელი მნიშვნელობა).</td>
-                            </tr>
-                            <tr>
-                                <td><code>noImplicitAny</code></td>
-                                <td>იმპლიციტური <code>any</code>-ს აკრძალვა (ტიპი აუცილებლად მისათითებელია, თუ კომპილერი ვერ ხვდება თავისით).</td>
-                            </tr>
-                            <tr>
-                                <td><code>strictFunctionTypes</code></td>
-                                <td>ფუნქციების ტიპების მკაცრი შემოწმება.</td>
-                            </tr>
-                            <tr>
-                                <td><code>strictBindCallApply</code></td>
-                                <td>bind/call/apply მეთოდების ტიპების მკაცრი შემოწმება.</td>
-                            </tr>
-                        </tbody>
-                    </table>
-
-                    <p style="font-size: 15px; color: var(--accent-cyan); margin-top: 15px; font-weight: bold;">
-                        💡 რეკომენდაცია: ყოველთვის გამოიყენეთ <code>strict: true</code> ახალი პროექტების დაწყებისას!
-                    </p>
-                </div>
-            </div>
-
-            <!-- Slide 12: exclude / include -->
-            <div class="slide" id="slide-13">
-                <h2 class="section-title"><i class="fa-solid fa-filter"></i> სლაიდი 12: exclude / include</h2>
-                <div class="scrollable-content grid-2">
-                    <div>
-                        <p>კონფიგურაციის ფაილში შეგვიძლია მივუთითოთ, თუ რომელი ფაილები ჩაერთოს ან გამოირიცხოს კომპილაციის პროცესიდან:</p>
-                        <pre style="font-size: 15px;"><code class="language-json">{
-  "exclude": [
-    "node_modules", 
-    "dist", 
-    "**/*.test.ts"
-  ],
-  "include": [
-    "src/**/*.ts"
-  ]
-}</code></pre>
-                    </div>
-                    <div>
-                        <div class="card card-cyan" style="margin-bottom: 15px;">
-                            <h3>📂 include</h3>
-                            <p style="font-size: 15px;">განსაზღვრავს რომელი ფაილები ჩავრთოთ კომპილაციაში. ჩვენს შემთხვევაში ყველა <span class="inline-code">.ts</span> ფაილი <span class="inline-code">src/</span> საქაღალდეში.</p>
-                        </div>
-                        <div class="card">
-                            <h3>🚫 exclude</h3>
-                            <p style="font-size: 15px;">განსაზღვრავს რომელი ფაილები ან საქაღალდეები იქნეს უგულებელყოფილი (მაგ: დაინსტალირებული ბიბლიოთეკები <span class="inline-code">node_modules</span> ან ტესტები).</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Slide 13: Summary -->
-            <div class="slide" id="slide-14" style="justify-content: center; align-items: center; text-align: center;">
-                <h2 style="font-size: 46px; color: var(--accent-blue); margin-bottom: 30px;"><i class="fa-solid fa-square-check"></i> შეჯამება</h2>
-                <div style="max-width: 800px; text-align: left; margin: 0 auto;">
-                    <ul class="bullets-star" style="font-size: 20px;">
-                        <li style="margin-bottom: 12px;"><strong>TypeScript</strong> არის JavaScript-ის სუპერსეტი ტიპებით, რომელიც ზრდის კოდის უსაფრთხოებას.</li>
-                        <li style="margin-bottom: 12px;">ინსტალაცია ხდება მარტივად: <code>npm install typescript --save-dev</code>.</li>
-                        <li style="margin-bottom: 12px;">კონფიგურაციისთვის ვიყენებთ <code>npx tsc --init</code> ბრძანებას, რომელიც ქმნის <code>tsconfig.json</code>-ს.</li>
-                        <li style="margin-bottom: 12px;">კოდს ვწერთ <code>src/</code> საქაღალდეში, ხოლო კომპილირებული კოდი თავსდება <code>dist/</code>-ში.</li>
-                        <li style="margin-bottom: 12px;">კომპილაციისთვის ვიყენებთ <code>npx tsc</code>-ს, ხოლო ავტომატური რეჟიმისთვის <code>npx tsc -w</code> (Watch რეჟიმი).</li>
-                        <li style="margin-bottom: 12px;"><strong>npm scripts</strong> საგრძნობლად ამარტივებს და აჩქარებს ყოველდღიურ მუშაობას.</li>
-                    </ul>
-                </div>
-            </div>
-
         </div>
 
-        <!-- Controls Bar -->
-        <div class="controls-bar">
-            <button class="control-btn" id="prev-btn">
-                <i class="fa-solid fa-chevron-left"></i> წინა
-            </button>
-            <div class="slide-indicator" id="slide-indicator">
-                სლაიდი 1 / 14
+        <!-- Slide 6: Summary -->
+        <div class="slide" id="s6" style="justify-content:center;align-items:center;text-align:center;">
+            <h2 style="font-size:42px;color:var(--blue);margin-bottom:24px;"><i class="fa-solid fa-square-check"></i> შეჯამება</h2>
+            <div style="max-width:700px;text-align:left;margin:0 auto;">
+                <ul style="font-size:19px;">
+                    <li style="margin-bottom:10px;"><strong>TypeScript</strong> = JavaScript + ტიპები</li>
+                    <li style="margin-bottom:10px;">ტიპები გვეხმარება შეცდომების ადრეულ გამოვლენაში</li>
+                    <li style="margin-bottom:10px;">ითამაშეთ <strong>Playground</strong>-ში — დაყენება არ სჭირდება</li>
+                    <li style="margin-bottom:10px;"><strong>Vite</strong> ქმნის React + TS პროექტს 1 ბრძანებით</li>
+                    <li style="margin-bottom:10px;">ტიპების მითითება = უფრო უსაფრთხო კოდი</li>
+                </ul>
             </div>
-            <button class="control-btn" id="next-btn">
-                შემდეგი <i class="fa-solid fa-chevron-right"></i>
-            </button>
         </div>
 
-        <!-- Progress Bar -->
-        <div class="progress-container">
-            <div class="progress-bar" id="progress-bar"></div>
-        </div>
     </div>
 
-    <script>
-        // Slides Logic
-        const slides = document.querySelectorAll('.slide');
-        const prevBtn = document.getElementById('prev-btn');
-        const nextBtn = document.getElementById('next-btn');
-        const slideIndicator = document.getElementById('slide-indicator');
-        const progressBar = document.getElementById('progress-bar');
-        
-        let currentSlide = 0;
+    <div class="controls">
+        <button class="ctrl-btn" id="prev"><i class="fa-solid fa-chevron-left"></i> წინა</button>
+        <span class="indicator" id="indicator">სლაიდი 1 / 7</span>
+        <button class="ctrl-btn" id="next">შემდეგი <i class="fa-solid fa-chevron-right"></i></button>
+    </div>
 
-        function updateSlides() {
-            slides.forEach((slide, index) => {
-                slide.classList.remove('active', 'prev');
-                if (index === currentSlide) {
-                    slide.classList.add('active');
-                } else if (index < currentSlide) {
-                    slide.classList.add('prev');
-                }
-            });
+    <div class="progress-wrap">
+        <div class="progress-bar" id="progress"></div>
+    </div>
+</div>
 
-            // Update UI
-            slideIndicator.textContent = `სლაიდი ${currentSlide + 1} / ${slides.length}`;
-            const progressPercent = ((currentSlide + 1) / slides.length) * 100;
-            progressBar.style.width = `${progressPercent}%`;
+<script>
+    const slides = document.querySelectorAll('.slide');
+    const prev = document.getElementById('prev');
+    const next = document.getElementById('next');
+    const indicator = document.getElementById('indicator');
+    const progress = document.getElementById('progress');
+    let current = 0;
 
-            // Button Disabling/Enabling
-            prevBtn.disabled = currentSlide === 0;
-            nextBtn.disabled = currentSlide === slides.length - 1;
-            
-            prevBtn.style.opacity = currentSlide === 0 ? "0.3" : "1";
-            nextBtn.style.opacity = currentSlide === slides.length - 1 ? "0.3" : "1";
-        }
-
-        function nextSlide() {
-            if (currentSlide < slides.length - 1) {
-                currentSlide++;
-                updateSlides();
-            }
-        }
-
-        function prevSlide() {
-            if (currentSlide > 0) {
-                currentSlide--;
-                updateSlides();
-            }
-        }
-
-        // Event Listeners
-        prevBtn.addEventListener('click', prevSlide);
-        nextBtn.addEventListener('click', nextSlide);
-
-        // Keyboard Controls
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'Enter') {
-                nextSlide();
-            } else if (e.key === 'ArrowLeft' || e.key === 'Backspace') {
-                prevSlide();
-            }
+    function update() {
+        slides.forEach((s, i) => {
+            s.classList.remove('active', 'prev');
+            if (i === current) s.classList.add('active');
+            else if (i < current) s.classList.add('prev');
         });
+        indicator.textContent = `სლაიდი ${current + 1} / ${slides.length}`;
+        progress.style.width = `${((current + 1) / slides.length) * 100}%`;
+        prev.disabled = current === 0;
+        next.disabled = current === slides.length - 1;
+        prev.style.opacity = current === 0 ? '.3' : '1';
+        next.style.opacity = current === slides.length - 1 ? '.3' : '1';
+    }
 
-        // Touch Swipe Support
-        let touchstartX = 0;
-        let touchendX = 0;
-        
-        const presentation = document.querySelector('.presentation-wrapper');
-        
-        presentation.addEventListener('touchstart', e => {
-            touchstartX = e.changedTouches[0].screenX;
-        });
+    function go(n) { if (n >= 0 && n < slides.length) { current = n; update(); } }
+    prev.addEventListener('click', () => go(current - 1));
+    next.addEventListener('click', () => go(current + 1));
+    document.addEventListener('keydown', e => {
+        if (e.key === 'ArrowRight') go(current + 1);
+        if (e.key === 'ArrowLeft') go(current - 1);
+    });
+    update();
 
-        presentation.addEventListener('touchend', e => {
-            touchendX = e.changedTouches[0].screenX;
-            handleGesture();
-        });
-
-        function handleGesture() {
-            if (touchendX < touchstartX - 50) {
-                nextSlide();
-            }
-            if (touchendX > touchstartX + 50) {
-                prevSlide();
-            }
-        }
-
-        // Initialize presentation
-        updateSlides();
-    </script>
+    // Touch
+    let tx = 0;
+    document.querySelector('.wrapper').addEventListener('touchstart', e => tx = e.changedTouches[0].screenX);
+    document.querySelector('.wrapper').addEventListener('touchend', e => {
+        const dx = e.changedTouches[0].screenX - tx;
+        if (dx < -50) go(current + 1);
+        if (dx > 50) go(current - 1);
+    });
+</script>
 </body>
 </html>
