@@ -4,9 +4,10 @@
 
 - გავიგოთ რა არის TypeScript და რატომ გამოვიყენოთ
 - ვცადოთ TypeScript ონლაინ Playground-ში
-- გავეცნოთ ძირითად ტიპებს
+- გავეცნოთ ძირითად ტიპებს: `string`, `number`, `boolean`, `any`
+- გავიგოთ როგორ მივუთითოთ ტიპები ცვლადებსა და ფუნქციებს
 - შევქმნათ React + TypeScript პროექტი Vite-ით
-- დავწეროთ პირველი TypeScript კომპონენტი
+- გავიგოთ `useState` და ღილაკზე დაკლიკება
 
 ---
 
@@ -57,21 +58,38 @@ console.log(`სახელი: ${message}, ასაკი: ${age}, სტუ�
 | `string` | `let name: string = "ნიკა"` | ტექსტი |
 | `number` | `let age: number = 25` | რიცხვი |
 | `boolean` | `let isActive: boolean = true` | ჭეშმარიტი/მცდარი |
-| `string[]` | `let names: string[] = ["ა", "ბ"]` | სტრინგების მასივი |
-| `number[]` | `let nums: number[] = [1, 2, 3]` | რიცხვების მასივი |
+| `any` | `let data: any = "რამე"` | ნებისმიერი ტიპი (მოვერიდოთ) |
 
-**ფუნქციები ტიპებით:**
+**ცვლადის ტიპის მითითება:**
 ```ts
-function greet(name: string): string {
-  return `გამარჯობა, ${name}!`;
-}
-
-function add(a: number, b: number): number {
-  return a + b;
-}
+let name: string = "ნიკა";
+let age: number = 20;
+let isStudent: boolean = true;
+let something: any = "შეიძლება შეიცვალოს";
 ```
 
-სცადეთ Playground-ში!
+**ფუნქციის პარამეტრების და დაბრუნების ტიპი:**
+```ts
+// პროდუქტის ფასი + გადასახადი
+function calculateTotal(price: number, tax: number): number {
+  return price + price * tax;
+}
+
+// მომხმარებლის მისალმება
+function welcomeUser(name: string): string {
+  return `კეთილი იყოს შენი მობრძანება, ${name}!`;
+}
+
+// ასაკის შემოწმება
+function canVote(age: number): boolean {
+  return age >= 18;
+}
+
+// კონსოლში გამოტანა
+function printReceipt(item: string): void {
+  console.log(`შეძენილია: ${item}`);
+}
+```
 
 ---
 
@@ -120,20 +138,34 @@ function App(): JSX.Element {
 export default App;
 ```
 
-**კომპონენტი Props-ით:**
+**useState + ღილაკზე დაკლიკება — მაგალითები:**
 
 ```tsx
-interface UserInfoProps {
-  name: string;
-  age: number;
-}
+import { useState } from "react";
 
-function UserInfo({ name, age }: UserInfoProps): JSX.Element {
+// მაღაზიის კალათა
+function Cart(): JSX.Element {
+  const [items, setItems] = useState(0);
+
   return (
     <div>
-      <h2>{name}</h2>
-      <p>ასაკი: {age}</p>
+      <p>კალათაში: {items} ცალი</p>
+      <button onClick={() => setItems(items + 1)}>დამატება</button>
+      <button onClick={() => setItems(items - 1)}>წაშლა</button>
     </div>
+  );
+}
+```
+
+```tsx
+// ლაიქების მთვლელი
+function LikeButton(): JSX.Element {
+  const [likes, setLikes] = useState(0);
+
+  return (
+    <button onClick={() => setLikes(likes + 1)}>
+      ❤️ {likes}
+    </button>
   );
 }
 ```
@@ -143,7 +175,10 @@ function UserInfo({ name, age }: UserInfoProps): JSX.Element {
 ## შეჯამება
 
 - **TypeScript** = JavaScript + ტიპები
-- ტიპები გვეხმარება შეცდომების ადრეულ გამოვლენაში
+- ძირითადი ტიპები: `string`, `number`, `boolean`
+- `any` — მოვერიდოთ, თუ შესაძლებელია
+- ფუნქციებს ვუწერთ პარამეტრების და დაბრუნების ტიპს
 - ითამაშეთ **Playground**-ში — დაყენება არ სჭირდება
-- **Vite** ქმნის React + TypeScript პროექტს 1 ბრძანებით
-- ტიპების მითითება React-ში უფრო უსაფრთხო კოდს ქმნის
+- **Vite** ქმნის React + TS პროექტს 1 ბრძანებით
+- `useState` — TypeScript თავად ხვდება ტიპს საწყისი მნიშვნელობიდან
+- გამოიყენეთ ცხოვრებისეული მაგალითები: ფასდაკლება, კალათა, ლაიქები, რეიტინგი

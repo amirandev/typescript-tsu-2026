@@ -92,7 +92,6 @@
             border-radius: 10px; padding: 14px 18px; margin: 8px 0 16px 0; overflow-x: auto;
         }
         code { font-family: 'Fira Code', monospace; font-size: 14px; color: #e2e8f0; line-height: 1.5; }
-        .ic { background: var(--code-bg); padding: 2px 6px; border-radius: 4px; color: #f43f5e; font-family: 'Fira Code', monospace; font-size: .9em; }
 
         .scrollable-content { overflow-y: auto; flex: 1; padding-right: 10px; }
         .scrollable-content::-webkit-scrollbar { width: 6px; }
@@ -204,28 +203,38 @@ console.log(`სახელი: ${message}, ასაკი: ${age}`);</code></
             <div class="grid-2">
                 <div>
                     <table>
-                        <thead><tr><th>ტიპი</th><th>მაგალითი</th></tr></thead>
+                        <thead><tr><th>ტიპი</th><th>მაგალითი</th><th>აღწერა</th></tr></thead>
                         <tbody>
-                            <tr><td><code>string</code></td><td><code>let name: string = "ნიკა"</code></td></tr>
-                            <tr><td><code>number</code></td><td><code>let age: number = 25</code></td></tr>
-                            <tr><td><code>boolean</code></td><td><code>let isActive: boolean = true</code></td></tr>
-                            <tr><td><code>string[]</code></td><td><code>let names: string[] = ["ა","ბ"]</code></td></tr>
-                            <tr><td><code>number[]</code></td><td><code>let nums: number[] = [1,2,3]</code></td></tr>
+                            <tr><td><code>string</code></td><td><code>let x: string = "ტექსტი"</code></td><td>ტექსტი</td></tr>
+                            <tr><td><code>number</code></td><td><code>let x: number = 25</code></td><td>რიცხვი</td></tr>
+                            <tr><td><code>boolean</code></td><td><code>let x: boolean = true</code></td><td>ჭეშმარიტი/მცდარი</td></tr>
+                            <tr><td><code>any</code></td><td><code>let x: any = "რამე"</code></td><td>ნებისმიერი (მოვერიდეთ)</td></tr>
                         </tbody>
                     </table>
+                    <p style="font-size:14px;margin-top:8px;">ცვლადს ტიპს ვუწერთ <code>: type</code>-ით.</p>
                 </div>
                 <div>
-                    <h3 style="font-size:17px;">ფუნქციები ტიპებით</h3>
-                    <pre style="padding:10px;font-size:13px;"><code>function greet(name: string): string {
-  return `გამარჯობა, ${name}!`;
+                    <h3 style="font-size:17px;">ფუნქციები — ცხოვრებისეული მაგალითები</h3>
+                    <pre style="padding:10px;font-size:13px;"><code>// ფასი + გადასახადი
+function calcTotal(
+  price: number, tax: number
+): number {
+  return price + price * tax;
 }
 
-function add(a: number, b: number): number {
-  return a + b;
+// ასაკის შემოწმება
+function canVote(age: number): boolean {
+  return age >= 18;
 }
 
-console.log(greet("ნინო"));
-console.log(add(5, 3));</code></pre>
+// მისალმება
+function welcome(name: string): string {
+  return `კეთილი იყოს, ${name}!`;
+}
+
+console.log(calcTotal(100, 0.18));
+console.log(canVote(20));
+console.log(welcome("ნინო"));</code></pre>
                     <p style="font-size:14px;color:var(--cyan);">💡 ითამაშეთ Playground-ში!</p>
                 </div>
             </div>
@@ -264,7 +273,7 @@ npm run dev</code></pre>
             <h2 class="section-title"><i class="fa-solid fa-code"></i> TypeScript React-ში</h2>
             <div class="grid-2">
                 <div>
-                    <h3 style="font-size:16px;">src/App.tsx</h3>
+                    <h3 style="font-size:16px;">src/App.tsx — ცვლადები</h3>
                     <pre style="padding:10px;font-size:12px;"><code>function App(): JSX.Element {
   const title: string = "Hello TS!";
   const year: number = 2026;
@@ -280,19 +289,31 @@ npm run dev</code></pre>
 export default App;</code></pre>
                 </div>
                 <div>
-                    <h3 style="font-size:16px;">კომპონენტი Props-ით</h3>
-                    <pre style="padding:10px;font-size:12px;"><code>interface GreetingProps {
-  name: string;
-  age: number;
-}
+                    <h3 style="font-size:16px;">useState + კლიკი — მაგალითები</h3>
+                    <pre style="padding:10px;font-size:12px;"><code>import { useState } from "react";
 
-function Greeting({ name, age }
-    : GreetingProps): JSX.Element {
+// კალათა
+function Cart(): JSX.Element {
+  const [items, setItems] = useState(0);
   return (
     &lt;div&gt;
-      &lt;h2&gt;გამარჯობა, {name}!&lt;/h2&gt;
-      &lt;p&gt;ასაკი: {age}&lt;/p&gt;
+      &lt;p&gt;კალათაში: {items} ც.&lt;/p&gt;
+      &lt;button onClick={() =>
+        setItems(items + 1)}&gt;+&lt;/button&gt;
+      &lt;button onClick={() =>
+        setItems(items - 1)}&gt;-&lt;/button&gt;
     &lt;/div&gt;
+  );
+}
+
+// ლაიქები
+function LikeBtn(): JSX.Element {
+  const [likes, setLikes] = useState(0);
+  return (
+    &lt;button onClick={() =>
+      setLikes(likes + 1)}&gt;
+      ❤️ {likes}
+    &lt;/button&gt;
   );
 }</code></pre>
                 </div>
@@ -305,10 +326,13 @@ function Greeting({ name, age }
             <div style="max-width:700px;text-align:left;margin:0 auto;">
                 <ul style="font-size:19px;">
                     <li style="margin-bottom:10px;"><strong>TypeScript</strong> = JavaScript + ტიპები</li>
-                    <li style="margin-bottom:10px;">ტიპები გვეხმარება შეცდომების ადრეულ გამოვლენაში</li>
+                    <li style="margin-bottom:10px;">ძირითადი ტიპები: <code>string</code>, <code>number</code>, <code>boolean</code></li>
+                    <li style="margin-bottom:10px;"><code>any</code> — მოვერიდოთ, თუ შესაძლებელია</li>
+                    <li style="margin-bottom:10px;">ფუნქციებს ვუწერთ პარამეტრების და დაბრუნების ტიპს</li>
                     <li style="margin-bottom:10px;">ითამაშეთ <strong>Playground</strong>-ში — დაყენება არ სჭირდება</li>
                     <li style="margin-bottom:10px;"><strong>Vite</strong> ქმნის React + TS პროექტს 1 ბრძანებით</li>
-                    <li style="margin-bottom:10px;">ტიპების მითითება = უფრო უსაფრთხო კოდი</li>
+                    <li style="margin-bottom:10px;"><code>useState</code> — TypeScript თავად ხვდება ტიპს საწყისი მნიშვნელობიდან</li>
+                    <li style="margin-bottom:10px;">გამოიყენეთ ცხოვრებისეული მაგალითები: ფასდაკლება, კალათა, ლაიქები</li>
                 </ul>
             </div>
         </div>
@@ -357,7 +381,6 @@ function Greeting({ name, age }
     });
     update();
 
-    // Touch
     let tx = 0;
     document.querySelector('.wrapper').addEventListener('touchstart', e => tx = e.changedTouches[0].screenX);
     document.querySelector('.wrapper').addEventListener('touchend', e => {

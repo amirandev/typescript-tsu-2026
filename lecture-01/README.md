@@ -14,7 +14,7 @@
 | 02 | [Playground](./presentation.md#სლაიდი-2-სცადე-typescript-ბრაუზერშივე) |
 | 03 | [ძირითადი ტიპები](./presentation.md#სლაიდი-3-ძირითადი-ტიპები) |
 | 04 | [Vite + React + TS](./presentation.md#სლაიდი-4-vite--react--typescript) |
-| 05 | [TypeScript React-ში](./presentation.md#სლაიდი-5-typescript-react-ში) |
+| 05 | [useState + ღილაკის კლიკი](./presentation.md#სლაიდი-5-typescript-react-ში) |
 
 ---
 
@@ -22,9 +22,9 @@
 
 - გავიგოთ რა არის TypeScript და რატომ გამოვიყენოთ
 - ვცადოთ TypeScript ონლაინ Playground-ში
-- გავეცნოთ ძირითად ტიპებს: `string`, `number`, `boolean`
+- გავეცნოთ ძირითად ტიპებს: `string`, `number`, `boolean`, `any`
 - შევქმნათ React + TypeScript პროექტი Vite-ით
-- დავწეროთ პირველი TypeScript კომპონენტი
+- გავიგოთ `useState` და ღილაკზე დაკლიკება
 
 ---
 

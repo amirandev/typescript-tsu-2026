@@ -10,44 +10,47 @@ TypeScript-ის გაცნობა Playground-ის საშუალე�
 
 გახსენით [TypeScript Playground](https://www.typescriptlang.org/play/) ან [PlayCode.io](https://playcode.io/typescript).
 
-### დავალება 1.1: ცვლადები და ტიპები
+### დავალება 1.1: ცვლადები — მომხმარებელი
 
 ```ts
-let courseName: string = "TypeScript";
-let students: number = 30;
-let isActive: boolean = true;
+let userName: string = "გიორგი";
+let userAge: number = 20;
+let isPremium: boolean = false;
 
-console.log(`კურსი: ${courseName}`);
-console.log(`სტუდენტები: ${students}`);
-console.log(`აქტიური: ${isActive}`);
+console.log(`მომხმარებელი: ${userName}`);
+console.log(`ასაკი: ${userAge}`);
+console.log(`პრემიუმი: ${isPremium}`);
 ```
 
-### დავალება 1.2: ფუნქციები
+### დავალება 1.2: ფუნქციები — ცხოვრებისეული
 
 ```ts
-function multiply(a: number, b: number): number {
-  return a * b;
+// ნივთის ფასი ფასდაკლებით
+function discountPrice(price: number, percent: number): number {
+  return price - (price * percent) / 100;
 }
 
-function sayHello(name: string): string {
-  return `Hello, ${name}!`;
+// მომხმარებლის მისალმება
+function greetUser(name: string): string {
+  return `გამარჯობა, ${name}! კეთილი იყოს შენი დაბრუნება.`;
 }
 
-console.log(multiply(5, 3));
-console.log(sayHello("Nika"));
+console.log(discountPrice(200, 10));
+console.log(greetUser("ნინო"));
 ```
 
-### დავალება 1.3: მასივები
+### დავალება 1.3: boolean ფუნქცია
 
 ```ts
-let fruits: string[] = ["apple", "banana", "orange"];
-let scores: number[] = [95, 87, 92];
+function isAdult(age: number): boolean {
+  return age >= 18;
+}
 
-console.log(fruits[0]);
-console.log(`საშუალო: ${(scores[0] + scores[1] + scores[2]) / scores.length}`);
+console.log(isAdult(20));
+console.log(isAdult(15));
 ```
 
-### დავალება 1.4: აიღეთ 3-ვე წინა მაგალითი, გააერთიანეთ — შეცვალეთ მნიშვნელობები თქვენით
+### დავალება 1.4: გააერთიანეთ — შეცვალეთ მნიშვნელობები თქვენით
 
 ---
 
@@ -58,8 +61,6 @@ console.log(`საშუალო: ${(scores[0] + scores[1] + scores[2]) / scor
 ```bash
 npx create-vite@latest my-first-ts-app --template react-ts
 ```
-
-აირჩიეთ React და TypeScript (თუ ინტერაქტიულ რეჟიმშია).
 
 ### ნაბიჯი 2: გახსენით პროექტი
 
@@ -78,14 +79,12 @@ function App(): JSX.Element {
   const title: string = "My First TypeScript App";
   const description: string = "ეს არის React + TypeScript პროექტი!";
   const year: number = 2026;
-  const isWorking: boolean = true;
 
   return (
     <div style={{ textAlign: "center", padding: "2rem" }}>
       <h1>{title}</h1>
       <p>{description}</p>
       <p>წელი: {year}</p>
-      <p>სტატუსი: {isWorking ? "მუშაობს 🚀" : "გათიშული"}</p>
     </div>
   );
 }
@@ -93,45 +92,41 @@ function App(): JSX.Element {
 export default App;
 ```
 
-### ნაბიჯი 4: დაამატეთ კომპონენტი
-
-შექმენით ფაილი `src/Greeting.tsx`:
+### ნაბიჯი 4: ლაიქების მთვლელი — ყველაფერი App.tsx-ში
 
 ```tsx
-interface GreetingProps {
-  name: string;
-  age: number;
-}
+import { useState } from "react";
 
-function Greeting({ name, age }: GreetingProps): JSX.Element {
+function App(): JSX.Element {
+  const [likes, setLikes] = useState(0);
+
   return (
-    <div style={{ background: "#f0f0f0", padding: "1rem", borderRadius: "8px" }}>
-      <h2>გამარჯობა, {name}!</h2>
-      <p>შენ ხარ {age} წლის.</p>
+    <div style={{ textAlign: "center", padding: "2rem" }}>
+      <h1>👍 ლაიქები: {likes}</h1>
+      <button onClick={() => setLikes(likes + 1)}>მომწონს</button>
+      <button onClick={() => setLikes(0)}>განულება</button>
     </div>
   );
 }
 
-export default Greeting;
+export default App;
 ```
 
-### ნაბიჯი 5: გამოიყენეთ App-ში
-
-`src/App.tsx`-ში:
+### ნაბიჯი 5: გააკეთეთ კალათის მთვლელი (იგივე App.tsx-ში)
 
 ```tsx
-import Greeting from "./Greeting";
+import { useState } from "react";
 
 function App(): JSX.Element {
-  const title: string = "My First TypeScript App";
-  const year: number = 2026;
+  const [items, setItems] = useState(0);
 
   return (
     <div style={{ textAlign: "center", padding: "2rem" }}>
-      <h1>{title}</h1>
-      <Greeting name="Nika" age={20} />
-      <Greeting name="Ana" age={22} />
-      <p>წელი: {year}</p>
+      <h1>🛒 კალათა</h1>
+      <p>ნივთები: {items}</p>
+      <button onClick={() => setItems(items + 1)}>➕</button>
+      <button onClick={() => items > 0 && setItems(items - 1)}>➖</button>
+      <button onClick={() => setItems(0)}>🗑️</button>
     </div>
   );
 }
@@ -141,16 +136,10 @@ export default App;
 
 ## შედეგი
 
-ბრაუზერში უნდა ხედავდეთ:
-```
-My First TypeScript App
-გამარჯობა, Nika! — შენ ხარ 20 წლის.
-გამარჯობა, Ana! — შენ ხარ 22 წლის.
-წელი: 2026
-```
+ბრაუზერში უნდა ხედავდეთ ღილაკებს, რომლებიც ცვლიან count-ს.
 
 ## კითხვები
 
-1. რა ტიპის არის ცვლადი `title` App.tsx-ში?
-2. რას აკეთებს `GreetingProps` ინტერფეისი?
-3. რა მოხდება თუ `<Greeting name="Nika" />`-ში age-ს არ მივუთითებთ?
+1. რა ტიპის არის ცვლადი `title`?
+2. როგორ ხვდება TypeScript რა ტიპის არის `items` useState-ში?
+3. რატომ გვჭირდება `items > 0 &&` წაშლის ღილაკზე?
