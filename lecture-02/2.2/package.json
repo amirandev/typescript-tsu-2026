@@ -1,0 +1,22 @@
+{
+  "name": "ts-lecture-02-2",
+  "version": "1.0.0",
+  "description": "TypeScript Lecture 02.2 - Forms & DOM",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "ts-node src/index.ts"
+  },
+  "keywords": [
+    "typescript",
+    "lecture-02",
+    "forms",
+    "dom"
+  ],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "typescript": "^6.0.3"
+  }
+}

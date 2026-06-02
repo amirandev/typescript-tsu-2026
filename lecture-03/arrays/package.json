@@ -1,0 +1,13 @@
+{
+  "name": "ts-lecture-03-arrays",
+  "version": "1.0.0",
+  "description": "TypeScript Lecture 03 - Arrays Deep Dive",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js"
+  },
+  "keywords": ["typescript", "lecture-03", "arrays"],
+  "author": "",
+  "license": "ISC"
+}

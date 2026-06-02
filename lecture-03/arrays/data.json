@@ -1,0 +1,10 @@
+[
+  { "product": "ლეპტოპი", "amount": 1500, "quantity": 3, "category": "ელექტრონიკა" },
+  { "product": "წიგნი", "amount": 25, "quantity": 10, "category": "განათლება" },
+  { "product": "ტელეფონი", "amount": 800, "quantity": 5, "category": "ელექტრონიკა" },
+  { "product": "კალამი", "amount": 2, "quantity": 100, "category": "საკანცელარიო" },
+  { "product": "პლანშეტი", "amount": 600, "quantity": 2, "category": "ელექტრონიკა" },
+  { "product": "რვეული", "amount": 3, "quantity": 50, "category": "საკანცელარიო" },
+  { "product": "სმარტფონი", "amount": 1200, "quantity": 4, "category": "ელექტრონიკა" },
+  { "product": "მარკერი", "amount": 5, "quantity": 30, "category": "საკანცელარიო" }
+]
