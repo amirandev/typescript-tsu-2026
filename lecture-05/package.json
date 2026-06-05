@@ -1,0 +1,21 @@
+{
+  "name": "ts-lecture-05",
+  "version": "1.0.0",
+  "description": "TypeScript Lecture 05 - Nested Objects",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "ts-node src/index.ts"
+  },
+  "keywords": [
+    "typescript",
+    "lecture-05"
+  ],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^25.9.1",
+    "typescript": "^6.0.3"
+  }
+}

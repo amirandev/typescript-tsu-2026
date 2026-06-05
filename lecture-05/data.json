@@ -1,0 +1,57 @@
+[
+  {
+    "id": 1,
+    "name": "მარიამ ჭელიძე",
+    "position": "Senior Developer",
+    "department": { "name": "IT", "floor": 3, "building": "A" },
+    "address": { "city": "თბილისი", "street": "ჭავჭავაძე 15", "zip": "0179" },
+    "contact": { "email": "mariam@company.ge", "phone": "+995 555 11 22 33" },
+    "skills": ["TypeScript", "React", "Node.js"],
+    "salary": 5000,
+    "isFullTime": true
+  },
+  {
+    "id": 2,
+    "name": "გიორგი ბერიძე",
+    "position": "Team Lead",
+    "department": { "name": "IT", "floor": 3, "building": "A" },
+    "address": { "city": "ბათუმი", "street": "რუსთაველი 10", "zip": "6010" },
+    "contact": { "email": "giorgi@company.ge", "phone": "+995 599 44 55 66" },
+    "skills": ["TypeScript", "Python", "AWS"],
+    "salary": 6500,
+    "isFullTime": true
+  },
+  {
+    "id": 3,
+    "name": "თეა მაისურაძე",
+    "position": "UX Designer",
+    "department": { "name": "Design", "floor": 2, "building": "A" },
+    "address": { "city": "თბილისი", "street": "კოსტავა 25", "zip": "0108" },
+    "contact": { "email": "tea@company.ge", "phone": "+995 577 77 88 99" },
+    "skills": ["Figma", "Adobe XD", "Design Systems"],
+    "salary": 4500,
+    "isFullTime": true
+  },
+  {
+    "id": 4,
+    "name": "დავით ნოზაძე",
+    "position": "Junior Developer",
+    "department": { "name": "IT", "floor": 3, "building": "A" },
+    "address": { "city": "ქუთაისი", "street": "თამარ მეფის 5", "zip": "4600" },
+    "contact": { "email": "davit@company.ge" },
+    "skills": ["JavaScript", "HTML", "CSS"],
+    "salary": 2500,
+    "isFullTime": false
+  },
+  {
+    "id": 5,
+    "name": "ნინო კვარაცხელია",
+    "position": "HR Manager",
+    "department": { "name": "HR", "floor": 1, "building": "B" },
+    "address": { "city": "თბილისი", "street": "პეკინი 30", "zip": "0160" },
+    "contact": { "email": "nino@company.ge", "phone": "+995 568 00 11 22" },
+    "skills": ["Recruiting", "Conflict Resolution", "Payroll"],
+    "salary": 4000,
+    "isFullTime": true
+  }
+]
