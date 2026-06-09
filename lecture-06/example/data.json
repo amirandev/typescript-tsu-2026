@@ -1,0 +1,44 @@
+[
+  {
+    "name": "tea",
+    "age": 25,
+    "city": "Tbilisi",
+    "active": true
+  },
+  {
+    "name": "davit",
+    "age": 30,
+    "city": "Batumi",
+    "active": false
+  },
+  {
+    "name": "nino",
+    "age": 22,
+    "city": "Kutaisi",
+    "active": true
+  },
+  {
+    "name": "gio",
+    "age": 35,
+    "city": "Rustavi",
+    "active": true
+  },
+  {
+    "name": "mariam",
+    "age": 28,
+    "city": "Zugdidi",
+    "active": false
+  },
+  {
+    "name": "lasha",
+    "age": 19,
+    "city": "Tbilisi",
+    "active": true
+  },
+  {
+    "name": "elene",
+    "age": 27,
+    "city": "Telavi",
+    "active": true
+  }
+]
