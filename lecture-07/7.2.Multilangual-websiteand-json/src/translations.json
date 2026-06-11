@@ -1,0 +1,60 @@
+{
+  "en": {
+    "labels": {
+      "name": "Name",
+      "email": "Email",
+      "phone": "Phone",
+      "address": "Address",
+      "city": "City",
+      "company": "Company",
+      "website": "Website"
+    },
+    "title": "User Profile",
+    "back": "Back to home"
+  },
+  "ge": {
+    "labels": {
+      "name": "სახელი",
+      "email": "ელ-ფოსტა",
+      "phone": "ტელეფონი",
+      "address": "მისამართი",
+      "city": "ქალაქი",
+      "company": "კომპანია",
+      "website": "ვებ-გვერდი"
+    },
+    "title": "მომხმარებლის პროფილი",
+    "back": "მთავარ გვერდზე დაბრუნება"
+  },
+  "users": [
+    {
+      "id": 1,
+      "name": "Tea Chkhetia",
+      "email": "tea@example.com",
+      "phone": "+995 599 111 111",
+      "address": "Rustaveli Ave 17",
+      "city": "Tbilisi",
+      "company": "Tech Corp",
+      "website": "tea.dev"
+    },
+    {
+      "id": 2,
+      "name": "Davit Khurtsia",
+      "email": "davit@example.com",
+      "phone": "+995 599 222 222",
+      "address": "Agmashenebeli Ave 45",
+      "city": "Batumi",
+      "company": "Web Solutions",
+      "website": "davit.dev"
+    },
+    {
+      "id": 3,
+      "name": "Nino Maisuradze",
+      "email": "nino@example.com",
+      "phone": "+995 599 333 333",
+      "address": "Leselidze St 12",
+      "city": "Tbilisi",
+      "company": "Design Studio",
+      "website": "nino.dev"
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "name": "ts-lecture-07",
+  "version": "1.0.0",
+  "description": "TypeScript Lecture 07 - Functions Deep Dive",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "ts-node src/index.ts"
+  },
+  "keywords": ["typescript", "lecture-07"],
+  "author": "",
+  "license": "ISC"
+}
