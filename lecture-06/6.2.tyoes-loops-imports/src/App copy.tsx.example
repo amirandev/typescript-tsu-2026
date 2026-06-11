@@ -1,0 +1,59 @@
+
+
+function App() {
+
+    // for(let i:number = 0; i < courses.length; i++){
+    //   let singleCourse = courses[i]
+    //   console.log('Display object:', singleCourse)
+    // }
+
+    // for(let index in courses){
+    //     let singleCourse = courses[index]
+
+    //     console.log('Display object:', singleCourse)
+    // }
+
+    // uf we use `in` keyword record variable will return a index numer
+    // for(let record in [22, 42, 13, 65, 77]){
+    // 0, 1, 2... 
+    //     console.log('Record:', record)
+    // }
+
+
+    // `of` keyword return no index - it returns the actual value
+    // for(let record of [22, 42, 13, 65, 77]){
+    //     // returns 22, 42...
+    //     console.log('Record:', record)
+    // }
+
+
+    // courses.forEach(function(singleCourse, index){ // courses.forEach(function(singleCourse, index)
+    //   // callback - ფუნქციაში ჩადგმული ფუნქცია
+
+    //   console.log('კურსი: ', singleCourse.title);
+    // })
+
+
+    // courses.forEach((record, index) => {
+    //   // callback - ფუნქციაში ჩადგმული ფუნქცია
+    // })
+
+
+    return <div className="container my-4">
+        <h1>Lets learn anonymus functions and imports</h1>
+        <ul className="list-group">
+            {
+                courses.map((course, index) => <>
+                    <li className="list-group-item d-flex justify-content-between">
+                        <strong>{index}.  {course.title} </strong>
+                        <span className={`badge ${course.is_availble ? 'bg-success' : 'bg-danger'} `}>
+                            { course.is_availble ? 'ხელკმისაწვდომია' : 'არ არის ხელმისაწვდომი' }
+                        </span>
+                    </li>
+                </>)
+            }
+        </ul>
+    </div>
+}
+
+export default App;
