@@ -1,8 +1,0 @@
-{
-  "compilerOptions": {
-    "strict": true,
-    "noUnusedParameters": true,
-    "rootDir": "./src",
-    "outDir": "./dist"
-  }
-}
