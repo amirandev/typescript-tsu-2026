@@ -1,5 +1,34 @@
 # საშინაო დავალება — ლექცია 07
 
+---
+
+## 🆕 7.1 — Language Buttons & Label Translations from Object
+
+### დავალება: მრავალენოვანი პროფილის გვერდი
+
+შექმენით React + TypeScript პროექტი Vite-ზე, სადაც იქნება 3 ენა: `en`, `ge`, `de`. თითოეულ ენას უნდა ჰქონდეს შემდეგი ველები:
+
+```ts
+interface PageContent {
+  heroTitle: string;
+  heroDescription: string;
+  aboutTitle: string;
+  aboutText: string;
+  contactEmail: string;
+  footerText: string;
+}
+```
+
+**მოთხოვნები:**
+
+1. **`src/data/translations.ts`** — 3 ენის თარგმანი PageContent ინტერფეისით
+2. **`src/pages/Home.tsx`** — იღებს `:lang` პარამეტრს `useParams`-ით, აჩვენებს hero, about, contact, footer სექციებს translated ტექსტით
+3. **ენის გადამრთველი** — 3 ღილაკი (EN / GE / DE), მიმდინარე ენა მონიშნულია
+4. **Fallback** — თუ URL-ში ენა არ არსებობს (მაგ. `/es`), მაინც აჩვენეთ `en` ვერსია + console.warn
+5. **`/:lang`** route, `/` redirect-ით `/en`-ზე
+
+**დამატებით (bonus):** დაამატეთ `LanguageSelector` კომპონენტი `src/components/`-ში, რომელიც მიიღებს `currentLang` და `onChange` props-ებს (`onChange` იყენებს `useNavigate`-ს).
+
 ## Utility ფუნქციების ბიბლიოთეკა
 
 შექმენით პროექტი შემდეგი სტრუქტურით:

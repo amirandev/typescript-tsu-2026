@@ -108,3 +108,36 @@ function formatDate(date: string): string;
 function formatDate(year: number, month: number, day: number): string;
 // implementation
 ```
+
+---
+
+## 🆕 7.1 — Language Buttons & Label Translations from Object
+
+### დავალება A: translations ობიექტი
+
+შექმენით `src/data/translations.ts` ფაილი translations ობიექტით 3 ენაზე (en, ge, fr). თითოეულ ენას უნდა ჰქონდეს: `title`, `subtitle`, `footer`.
+
+```ts
+// მაგალითი
+export const translations = {
+  en: { title: "...", subtitle: "...", footer: "..." },
+  ge: { title: "...", subtitle: "...", footer: "..." },
+  fr: { title: "...", subtitle: "...", footer: "..." },
+} as const;
+
+export type Lang = keyof typeof translations;
+```
+
+### დავალება B: Language Selector კომპონენტი
+
+შექმენით `src/components/LanguageSelector.tsx` — კომპონენტი, რომელიც აჩვენებს ღილაკებს `/en`, `/ge`, `/fr` ლინკებით. მიმდინარე ენის ღილაკი უნდა იყოს highlighted.
+
+**მინიშნება:** `useParams` + `Link`.
+
+### დავალება C: Home გვერდი
+
+შექმენით `src/pages/Home.tsx` — იყენებს `useParams`-ს `:lang`-ის წასაკითხად, ირჩევს შესაბამის თარგმანს ობიექტიდან და აჩვენებს ეკრანზე. თუ ენა არ არსებობს, გამოიყენეთ default-ად `en`.
+
+### დავალება D: маршрутизація
+
+`src/App.tsx`-ში Route-ის პარამეტრი `/:lang` და redirect `/` → `/en`. `BrowserRouter` `main.tsx`-ში.
