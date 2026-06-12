@@ -1,0 +1,42 @@
+import type { Order } from "../types";
+
+const orders: Order[] = [
+  {
+    orderId: 101,
+    customer: "tea",
+    items: [
+      { product: "Laptop", price: 2499.99, quantity: 1 },
+      { product: "Mouse", price: 29.99, quantity: 2 },
+    ],
+    status: "shipped",
+  },
+  {
+    orderId: 102,
+    customer: "davit",
+    items: [{ product: "Book", price: 19.99, quantity: 3 }],
+    status: "pending",
+  },
+  {
+    orderId: 103,
+    customer: "nino",
+    items: [
+      { product: "Desk Chair", price: 399.99, quantity: 1 },
+      { product: "Desk Lamp", price: 49.99, quantity: 1 },
+    ],
+    status: "delivered",
+  },
+  {
+    orderId: 104,
+    customer: "gio",
+    items: [{ product: "Headphones", price: 149.99, quantity: 1 }],
+    status: "cancelled",
+  },
+  {
+    orderId: 105,
+    customer: "mariam",
+    items: [{ product: "Monitor", price: 599.99, quantity: 2 }],
+    status: "shipped",
+  },
+];
+
+export default orders;
