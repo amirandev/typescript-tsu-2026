@@ -1,0 +1,32 @@
+{
+  "title": "TypeScript DOM Exercises",
+  "description": "HTML template data for DOM manipulation exercises",
+  "header": {
+    "logo": "TS",
+    "navLinks": ["Home", "About", "Contact", "Exercises"]
+  },
+  "main": {
+    "heading": "Welcome to TypeScript DOM Manipulation",
+    "sections": [
+      {
+        "id": "section-1",
+        "title": "Creating Elements",
+        "content": "Learn how to create DOM elements dynamically"
+      },
+      {
+        "id": "section-2",
+        "title": "Event Handling",
+        "content": "Handle user interactions with events"
+      },
+      {
+        "id": "section-3",
+        "title": "Styling Elements",
+        "content": "Modify CSS styles through JavaScript"
+      }
+    ]
+  },
+  "footer": {
+    "text": "© 2026 TypeScript Course",
+    "links": ["Privacy", "Terms"]
+  }
+}

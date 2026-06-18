@@ -1,0 +1,21 @@
+{
+  "name": "ts-lecture-08",
+  "version": "1.0.0",
+  "description": "TypeScript Lecture 08 - DOM Manipulation",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "npx http-server . -p 8080 -o src/index.html",
+    "dev": "npx tsc --watch"
+  },
+  "keywords": [
+    "typescript",
+    "lecture-08"
+  ],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "http-server": "^14.1.1",
+    "typescript": "^6.0.3"
+  }
+}
