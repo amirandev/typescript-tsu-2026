@@ -1,0 +1,24 @@
+[
+  "hello",
+  42,
+  true,
+  null,
+  {
+    "type": "user",
+    "name": "tea",
+    "age": 25
+  },
+  {
+    "type": "admin",
+    "name": "gio",
+    "permissions": ["read", "write", "delete"]
+  },
+  [1, 2, 3, 4, 5],
+  3.14,
+  {
+    "type": "config",
+    "debug": true,
+    "maxRetries": 3
+  },
+  "world"
+]
