@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Register — Pure TS Forms</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <nav>
+    <a href="index.html">Home</a>
+    <a href="about.html">About</a>
+    <a href="contact.html">Contact</a>
+    <a href="register.html">Register</a>
+  </nav>
+
+  <main>
+    <h1>Register</h1>
+    <p class="subtitle">Live validation as you type — no framework needed.</p>
+
+    <div class="defaults-box">
+      <strong>Default values used:</strong>
+      <pre id="defaults-display"></pre>
+    </div>
+
+    <form id="register-form" novalidate>
+      <div>
+        <label for="username">Username</label>
+        <input id="username" name="username" />
+        <p class="error" data-error="username"></p>
+        <p class="hint">Live async check: "admin", "root", "test" are taken</p>
+      </div>
+
+      <div>
+        <label for="email">Email</label>
+        <input id="email" name="email" type="email" />
+        <p class="error" data-error="email"></p>
+      </div>
+
+      <div>
+        <label for="password">Password</label>
+        <input id="password" name="password" type="password" />
+        <p class="error" data-error="password"></p>
+      </div>
+
+      <div>
+        <label for="confirmPassword">Confirm Password</label>
+        <input id="confirmPassword" name="confirmPassword" type="password" />
+        <p class="error" data-error="confirmPassword"></p>
+      </div>
+
+      <div>
+        <label for="role">Role</label>
+        <select id="role" name="role">
+          <option value="user">User</option>
+          <option value="admin">Admin</option>
+          <option value="moderator">Moderator</option>
+        </select>
+      </div>
+
+      <div class="checkbox-group">
+        <input id="acceptTerms" name="acceptTerms" type="checkbox" />
+        <label for="acceptTerms">I accept the terms and conditions</label>
+        <p class="error" data-error="acceptTerms"></p>
+      </div>
+
+      <button type="submit">Register</button>
+    </form>
+  </main>
+
+  <script type="module" src="dist/register.js"></script>
+</body>
+</html>

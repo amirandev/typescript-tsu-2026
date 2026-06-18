@@ -1,0 +1,13 @@
+{
+  "name": "pute-typescript-form",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Pure TypeScript forms project — no frameworks, no React",
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc --watch"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3"
+  }
+}
