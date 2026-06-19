@@ -1,0 +1,12 @@
+[
+  { "id": 1, "name": "Laptop", "category": "Electronics", "price": 1200 },
+  { "id": 2, "name": "Smartphone", "category": "Electronics", "price": 800 },
+  { "id": 3, "name": "Desk Chair", "category": "Furniture", "price": 250 },
+  { "id": 4, "name": "Notebook", "category": "Stationery", "price": 5 },
+  { "id": 5, "name": "Headphones", "category": "Electronics", "price": 150 },
+  { "id": 6, "name": "Coffee Mug", "category": "Kitchen", "price": 12 },
+  { "id": 7, "name": "Backpack", "category": "Accessories", "price": 60 },
+  { "id": 8, "name": "Monitor", "category": "Electronics", "price": 350 },
+  { "id": 9, "name": "Keyboard", "category": "Electronics", "price": 45 },
+  { "id": 10, "name": "Desk Lamp", "category": "Furniture", "price": 30 }
+]
