@@ -1,0 +1,37 @@
+import { useEffect, useState } from 'react'
+import { auth, likes } from '../api/client'
+import type { Post } from '../types'
+
+export default function ProfilePage() {
+  const [posts, setPosts] = useState<Post[]>([])
+  const [user, setUser] = useState<{ name: string; email: string } | null>(null)
+
+  useEffect(() => {
+    auth.me().then(setUser)
+    fetch('https://courses.xrow.asia/api/profile', {
+      headers: { Authorization: `Bearer ${localStorage.getItem('api_token')}` },
+    })
+      .then(r => r.json())
+      .then(d => setPosts(d.data))
+  }, [])
+
+  const handleLike = async (postId: number) => {
+    const res = await likes.toggle(postId)
+    setPosts(prev => prev.map(p => p.id === postId ? { ...p, is_liked: res.liked, likes_count: res.likes_count } : p))
+  }
+
+  return (
+    <div>
+      <h2>My Profile</h2>
+      {user && <p><strong>{user.name}</strong> — {user.email}</p>}
+      <h3>My Posts ({posts.length})</h3>
+      {posts.map(post => (
+        <div key={post.id} style={{ border: '1px solid #ddd', margin: '1rem 0', padding: '1rem', borderRadius: '8px' }}>
+          <h4 style={{ margin: 0 }}>{post.title}</h4>
+          <p style={{ color: '#555' }}>{post.body}</p>
+          <button onClick={() => handleLike(post.id)}>{post.is_liked ? '♥' : '♡'} {post.likes_count}</button>
+        </div>
+      ))}
+    </div>
+  )
+}
