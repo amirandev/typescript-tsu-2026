@@ -1,19 +1,28 @@
 import { useEffect, useState } from 'react'
-import { posts, likes } from '../api/client'
 import type { Post } from '../types'
+
+const BASE = 'https://courses.xrow.asia/api'
 
 export default function TimelinePage() {
   const [data, setData] = useState<{ data: Post[]; total: number } | null>(null)
 
+  const headers = { Authorization: `Bearer ${localStorage.getItem('api_token')}` }
+
   useEffect(() => {
-    posts.timeline().then(setData)
+    fetch(`${BASE}/timeline`, { headers })
+      .then(r => r.json())
+      .then(setData)
   }, [])
 
   const handleLike = async (postId: number) => {
-    const res = await likes.toggle(postId)
+    const res = await fetch(`${BASE}/posts/${postId}/toggle-like`, {
+      method: 'POST',
+      headers,
+    })
+    const result = await res.json()
     setData(prev => {
       if (!prev) return prev
-      return { ...prev, data: prev.data.map(p => p.id === postId ? { ...p, is_liked: res.liked, likes_count: res.likes_count } : p) }
+      return { ...prev, data: prev.data.map(p => p.id === postId ? { ...p, is_liked: result.liked, likes_count: result.likes_count } : p) }
     })
   }
 

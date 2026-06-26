@@ -1,7 +1,12 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { posts, likes } from '../api/client'
 import type { Post } from '../types'
+
+const BASE = 'https://courses.xrow.asia/api'
+
+function token() {
+  return localStorage.getItem('api_token')
+}
 
 export default function PostsPage() {
   const [data, setData] = useState<{ data: Post[]; current_page: number; last_page: number; total: number } | null>(null)
@@ -9,18 +14,25 @@ export default function PostsPage() {
   const [error, setError] = useState('')
 
   useEffect(() => {
-    posts.list(page).then(setData).catch(() => setError('Failed to load posts'))
+    fetch(`${BASE}/posts?page=${page}&per_page=15`)
+      .then(r => r.json())
+      .then(setData)
+      .catch(() => setError('Failed to load posts'))
   }, [page])
 
   const handleLike = async (postId: number) => {
     try {
-      const res = await likes.toggle(postId)
+      const res = await fetch(`${BASE}/posts/${postId}/toggle-like`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token()}` },
+      })
+      const result = await res.json()
       setData(prev => {
         if (!prev) return prev
         return {
           ...prev,
           data: prev.data.map(p =>
-            p.id === postId ? { ...p, is_liked: res.liked, likes_count: res.likes_count } : p
+            p.id === postId ? { ...p, is_liked: result.liked, likes_count: result.likes_count } : p
           ),
         }
       })

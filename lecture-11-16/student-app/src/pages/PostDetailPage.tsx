@@ -1,7 +1,12 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { posts, likes, comments, shares } from '../api/client'
 import type { Post } from '../types'
+
+const BASE = 'https://courses.xrow.asia/api'
+
+function token() {
+  return localStorage.getItem('api_token')
+}
 
 export default function PostDetailPage() {
   const { id } = useParams()
@@ -11,27 +16,45 @@ export default function PostDetailPage() {
   const [error, setError] = useState('')
 
   useEffect(() => {
-    if (id) posts.show(Number(id)).then(setPost).catch(() => setError('Post not found'))
+    if (!id) return
+    fetch(`${BASE}/posts/${id}`)
+      .then(r => r.json())
+      .then(setPost)
+      .catch(() => setError('Post not found'))
   }, [id])
 
   const handleLike = async () => {
     if (!post) return
-    const res = await likes.toggle(post.id)
-    setPost(prev => prev ? { ...prev, is_liked: res.liked, likes_count: res.likes_count } : prev)
+    const res = await fetch(`${BASE}/posts/${post.id}/toggle-like`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token()}` },
+    })
+    const result = await res.json()
+    setPost(prev => prev ? { ...prev, is_liked: result.liked, likes_count: result.likes_count } : prev)
   }
 
   const handleComment = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!post || !commentBody.trim()) return
-    const res = await comments.create(post.id, commentBody)
-    setPost(prev => prev ? { ...prev, comments: [...(prev.comments || []), res.comment], comments_count: prev.comments_count + 1 } : prev)
+    const res = await fetch(`${BASE}/posts/${post.id}/comments`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token()}` },
+      body: JSON.stringify({ body: commentBody }),
+    })
+    const result = await res.json()
+    setPost(prev => prev ? { ...prev, comments: [...(prev.comments || []), result.comment], comments_count: prev.comments_count + 1 } : prev)
     setCommentBody('')
   }
 
   const handleShare = async () => {
     if (!post) return
-    const res = await shares.create(post.id, 'facebook')
-    setPost(prev => prev ? { ...prev, shares_count: res.shares_count } : prev)
+    const res = await fetch(`${BASE}/posts/${post.id}/share`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token()}` },
+      body: JSON.stringify({ platform: 'facebook' }),
+    })
+    const result = await res.json()
+    setPost(prev => prev ? { ...prev, shares_count: result.shares_count } : prev)
   }
 
   if (error) return <p style={{ color: 'red' }}>{error}</p>

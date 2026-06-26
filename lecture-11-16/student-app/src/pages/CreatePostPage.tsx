@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { posts } from '../api/client'
+
+const BASE = 'https://courses.xrow.asia/api'
 
 export default function CreatePostPage() {
   const navigate = useNavigate()
@@ -12,7 +13,15 @@ export default function CreatePostPage() {
     e.preventDefault()
     setError('')
     try {
-      await posts.create({ title, body })
+      const res = await fetch(`${BASE}/posts`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('api_token')}`,
+        },
+        body: JSON.stringify({ title, body }),
+      })
+      if (!res.ok) throw new Error()
       navigate('/posts')
     } catch {
       setError('Failed to create post')

@@ -1,25 +1,33 @@
 import { useEffect, useState } from 'react'
-import { users, friends } from '../api/client'
 import type { User } from '../types'
+
+const BASE = 'https://courses.xrow.asia/api'
+
+function headers() {
+  return { Authorization: `Bearer ${localStorage.getItem('api_token')}` }
+}
 
 export default function UsersPage() {
   const [data, setData] = useState<User[]>([])
   const [search, setSearch] = useState('')
 
   useEffect(() => {
-    users.list(search).then(res => setData(res.data))
+    const q = search ? `?search=${encodeURIComponent(search)}` : ''
+    fetch(`${BASE}/users${q}`, { headers: headers() })
+      .then(r => r.json())
+      .then(res => setData(res.data))
   }, [search])
 
   const handleSendRequest = async (userId: number) => {
     try {
-      await friends.sendRequest(userId)
+      await fetch(`${BASE}/friend-request/${userId}`, { method: 'POST', headers: headers() })
       setData(prev => prev.map(u => u.id === userId ? { ...u, friend_request_sent: true } : u))
     } catch { /* ignore */ }
   }
 
   const handleAccept = async (userId: number) => {
     try {
-      await friends.acceptRequest(userId)
+      await fetch(`${BASE}/friend-request/${userId}/accept`, { method: 'POST', headers: headers() })
       setData(prev => prev.map(u => u.id === userId ? { ...u, is_friend: true, friend_request_received: false } : u))
     } catch { /* ignore */ }
   }

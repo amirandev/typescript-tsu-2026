@@ -1,6 +1,19 @@
 import { createContext, useContext, useState, useEffect, type ReactNode } from 'react'
-import { auth, getToken, setToken, clearToken } from '../api/client'
 import type { User } from '../types'
+
+const BASE = 'https://courses.xrow.asia/api'
+
+function getToken(): string | null {
+  return localStorage.getItem('api_token')
+}
+
+function setToken(t: string) {
+  localStorage.setItem('api_token', t)
+}
+
+function clearToken() {
+  localStorage.removeItem('api_token')
+}
 
 interface AuthState {
   user: User | null
@@ -20,7 +33,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (token) {
-      auth.me()
+      fetch(`${BASE}/me`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+        .then(r => { if (!r.ok) throw new Error(); return r.json() })
         .then(setUser)
         .catch(() => {
           clearToken()
@@ -33,21 +49,38 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [token])
 
   const login = async (email: string, password: string) => {
-    const data = await auth.login(email, password)
+    const res = await fetch(`${BASE}/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password }),
+    })
+    const data = await res.json()
+    if (!res.ok) throw data
     setToken(data.token)
     setTokenState(data.token)
     setUser(data.user)
   }
 
   const register = async (name: string, email: string, password: string) => {
-    const data = await auth.register(name, email, password)
+    const res = await fetch(`${BASE}/register`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, email, password, password_confirmation: password }),
+    })
+    const data = await res.json()
+    if (!res.ok) throw data
     setToken(data.token)
     setTokenState(data.token)
     setUser(data.user)
   }
 
   const logout = async () => {
-    try { await auth.logout() } catch { /* ignore */ }
+    try {
+      await fetch(`${BASE}/logout`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${getToken()}` },
+      })
+    } catch { /* ignore */ }
     clearToken()
     setTokenState(null)
     setUser(null)

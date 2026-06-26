@@ -1,0 +1,1 @@
+export const API_BASEURL = 'https://courses.xrow.asia/api';

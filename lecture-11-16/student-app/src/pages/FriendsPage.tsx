@@ -1,6 +1,11 @@
 import { useEffect, useState } from 'react'
-import { friends } from '../api/client'
 import type { User, Friendship } from '../types'
+
+const BASE = 'https://courses.xrow.asia/api'
+
+function headers() {
+  return { Authorization: `Bearer ${localStorage.getItem('api_token')}` }
+}
 
 export default function FriendsPage() {
   const [friendList, setFriendList] = useState<User[]>([])
@@ -8,23 +13,29 @@ export default function FriendsPage() {
   const [tab, setTab] = useState<'friends' | 'pending'>('friends')
 
   useEffect(() => {
-    friends.list().then(r => setFriendList(r.data))
-    friends.pendingRequests().then(r => setPending(r.data))
+    fetch(`${BASE}/friends`, { headers: headers() })
+      .then(r => r.json())
+      .then(r => setFriendList(r.data))
+    fetch(`${BASE}/friend-requests/pending`, { headers: headers() })
+      .then(r => r.json())
+      .then(r => setPending(r.data))
   }, [])
 
   const handleAccept = async (userId: number) => {
-    await friends.acceptRequest(userId)
+    await fetch(`${BASE}/friend-request/${userId}/accept`, { method: 'POST', headers: headers() })
     setPending(prev => prev.filter(f => f.sender_id !== userId))
-    friends.list().then(r => setFriendList(r.data))
+    fetch(`${BASE}/friends`, { headers: headers() })
+      .then(r => r.json())
+      .then(r => setFriendList(r.data))
   }
 
   const handleReject = async (userId: number) => {
-    await friends.rejectRequest(userId)
+    await fetch(`${BASE}/friend-request/${userId}`, { method: 'DELETE', headers: headers() })
     setPending(prev => prev.filter(f => f.sender_id !== userId))
   }
 
   const handleRemove = async (userId: number) => {
-    await friends.remove(userId)
+    await fetch(`${BASE}/friends/${userId}`, { method: 'DELETE', headers: headers() })
     setFriendList(prev => prev.filter(f => f.id !== userId))
   }
 

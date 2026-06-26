@@ -1,23 +1,32 @@
 import { useEffect, useState } from 'react'
-import { auth, likes } from '../api/client'
 import type { Post } from '../types'
+
+const BASE = 'https://courses.xrow.asia/api'
 
 export default function ProfilePage() {
   const [posts, setPosts] = useState<Post[]>([])
   const [user, setUser] = useState<{ name: string; email: string } | null>(null)
 
+  const headers = {
+    Authorization: `Bearer ${localStorage.getItem('api_token')}`,
+  }
+
   useEffect(() => {
-    auth.me().then(setUser)
-    fetch('https://courses.xrow.asia/api/profile', {
-      headers: { Authorization: `Bearer ${localStorage.getItem('api_token')}` },
-    })
+    fetch(`${BASE}/me`, { headers })
+      .then(r => r.json())
+      .then(setUser)
+    fetch(`${BASE}/profile`, { headers })
       .then(r => r.json())
       .then(d => setPosts(d.data))
   }, [])
 
   const handleLike = async (postId: number) => {
-    const res = await likes.toggle(postId)
-    setPosts(prev => prev.map(p => p.id === postId ? { ...p, is_liked: res.liked, likes_count: res.likes_count } : p))
+    const res = await fetch(`${BASE}/posts/${postId}/toggle-like`, {
+      method: 'POST',
+      headers,
+    })
+    const result = await res.json()
+    setPosts(prev => prev.map(p => p.id === postId ? { ...p, is_liked: result.liked, likes_count: result.likes_count } : p))
   }
 
   return (
