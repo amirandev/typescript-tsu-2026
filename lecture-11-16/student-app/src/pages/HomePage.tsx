@@ -1,8 +1,19 @@
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { useAuth } from '../context/AuthContext'
+
+const BASE = 'https://courses.xrow.asia/api'
 
 export default function HomePage() {
-  const { user } = useAuth()
+  const [user, setUser] = useState<{ name: string } | null>(null)
+
+  useEffect(() => {
+    const token = localStorage.getItem('api_token')
+    if (!token) return
+    fetch(`${BASE}/me`, { headers: { Authorization: `Bearer ${token}` } })
+      .then(r => r.json())
+      .then(u => setUser(u))
+      .catch(() => setUser(null))
+  }, [])
 
   return (
     <div style={{ textAlign: 'center', marginTop: '3rem' }}>

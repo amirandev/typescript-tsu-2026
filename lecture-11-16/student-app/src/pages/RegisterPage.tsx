@@ -1,9 +1,10 @@
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
-import { useAuth } from '../context/AuthContext'
+import type { AuthResponse } from '../types'
+
+const BASE = 'https://courses.xrow.asia/api'
 
 export default function RegisterPage() {
-  const { register } = useAuth()
   const navigate = useNavigate()
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
@@ -14,11 +15,20 @@ export default function RegisterPage() {
     e.preventDefault()
     setError('')
     try {
-      await register(name, email, password)
+      const res = await fetch(`${BASE}/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, password, password_confirmation: password }),
+      })
+      const data: AuthResponse = await res.json()
+      if (!res.ok) {
+        setError((data as any).message || Object.values(data).flat().join(', ') || 'Registration failed')
+        return
+      }
+      localStorage.setItem('api_token', data.token)
       navigate('/posts')
-    } catch (err: any) {
-      const msg = typeof err === 'object' ? Object.values(err).flat().join(', ') : 'Registration failed'
-      setError(msg)
+    } catch {
+      setError('Registration failed')
     }
   }
 

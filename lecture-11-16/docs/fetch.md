@@ -4,57 +4,93 @@ No libraries needed — `fetch()` is built into every browser and Node 18+.
 
 ---
 
-## Setup with localStorage
+## Setup
 
 ```typescript
 const BASE = 'https://courses.xrow.asia/api';
 
-// Load token from localStorage on page load
-function loadToken(): string | null {
-  return localStorage.getItem('api_token');
-}
-
-// Save token to localStorage (survives page refresh)
-function saveToken(t: string) {
-  localStorage.setItem('api_token', t);
-  token = t;
-}
-
-// Clear token on logout
-function clearToken() {
-  localStorage.removeItem('api_token');
-  token = null;
-}
-
-// In-memory token (faster than reading localStorage every request)
-let token: string | null = loadToken();
-```
-
----
-
-## Helper: auth headers
-
-```typescript
-function headers(): Record<string, string> {
-  const h: Record<string, string> = { 'Content-Type': 'application/json' };
-  // Always check localStorage in case another tab updated it
-  const t = token ?? loadToken();
-  if (t) h['Authorization'] = `Bearer ${t}`;
-  return h;
+function authHeaders(): Record<string, string> {
+  return { Authorization: `Bearer ${localStorage.getItem('api_token')}` };
 }
 ```
 
 ---
 
-## Helper: handle response
+## Types
+
+All response types are defined in `src/types/index.ts`:
 
 ```typescript
-async function handleResponse<T>(res: Response): Promise<T> {
-  if (!res.ok) {
-    const body = await res.json().catch(() => ({}));
-    throw { status: res.status, ...body };
-  }
-  return res.json();
+export interface User {
+  id: number;
+  name: string;
+  email: string;
+  created_at: string;
+  updated_at: string;
+  is_friend?: boolean;
+  friend_request_sent?: boolean;
+  friend_request_received?: boolean;
+  posts_count?: number;
+  friends_count?: number;
+}
+
+export interface Post {
+  id: number;
+  user_id: number;
+  title: string;
+  body: string;
+  created_at: string;
+  updated_at: string;
+  likes_count: number;
+  comments_count: number;
+  shares_count: number;
+  is_liked: boolean;
+  user?: Pick<User, 'id' | 'name'>;
+  comments?: Comment[];
+}
+
+export interface Comment {
+  id: number;
+  user_id: number;
+  post_id: number;
+  body: string;
+  created_at: string;
+  updated_at: string;
+  user?: Pick<User, 'id' | 'name'>;
+}
+
+export interface AuthResponse {
+  message: string;
+  user: User;
+  token: string;
+}
+
+export interface PaginatedResponse<T> {
+  current_page: number;
+  data: T[];
+  first_page_url: string;
+  from: number | null;
+  last_page: number;
+  last_page_url: string;
+  next_page_url: string | null;
+  path: string;
+  per_page: number;
+  prev_page_url: string | null;
+  to: number | null;
+  total: number;
+}
+
+export interface LikeToggleResponse {
+  liked: boolean;
+  likes_count: number;
+}
+
+export interface ShareCountResponse {
+  shares_count: number;
+}
+
+export interface MessageResponse {
+  message: string;
 }
 ```
 
@@ -71,8 +107,9 @@ async function register(name: string, email: string, password: string) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ name, email, password, password_confirmation: password }),
   });
-  const data = await handleResponse<{ user: any; token: string }>(res);
-  saveToken(data.token); // persists to localStorage
+  const data = await res.json() as AuthResponse;
+  if (!res.ok) throw data;
+  localStorage.setItem('api_token', data.token);
   return data;
 }
 ```
@@ -86,8 +123,9 @@ async function login(email: string, password: string) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ email, password }),
   });
-  const data = await handleResponse<{ user: any; token: string }>(res);
-  saveToken(data.token); // persists to localStorage
+  const data = await res.json() as { message: string; token: string; user: User };
+  if (!res.ok) throw data;
+  localStorage.setItem('api_token', data.token);
   return data;
 }
 ```
@@ -95,9 +133,9 @@ async function login(email: string, password: string) {
 ### Get current user
 
 ```typescript
-async function getMe() {
-  const res = await fetch(`${BASE}/me`, { headers: headers() });
-  return handleResponse(res);
+async function getMe(): Promise<User> {
+  const res = await fetch(`${BASE}/me`, { headers: authHeaders() });
+  return res.json();
 }
 ```
 
@@ -107,10 +145,10 @@ async function getMe() {
 async function logout() {
   const res = await fetch(`${BASE}/logout`, {
     method: 'POST',
-    headers: headers(),
+    headers: authHeaders(),
   });
-  clearToken(); // removes from localStorage
-  return handleResponse(res);
+  localStorage.removeItem('api_token');
+  return res.json() as Promise<MessageResponse>;
 }
 ```
 
@@ -120,14 +158,14 @@ async function logout() {
 async function changePassword(current: string, newPass: string) {
   const res = await fetch(`${BASE}/change-password`, {
     method: 'POST',
-    headers: headers(),
+    headers: { ...authHeaders(), 'Content-Type': 'application/json' },
     body: JSON.stringify({
       current_password: current,
       new_password: newPass,
       new_password_confirmation: newPass,
     }),
   });
-  return handleResponse(res);
+  return res.json() as Promise<MessageResponse>;
 }
 ```
 
@@ -138,23 +176,18 @@ async function changePassword(current: string, newPass: string) {
 ### List posts (public)
 
 ```typescript
-async function getPosts(page = 1) {
+async function getPosts(page = 1): Promise<PaginatedResponse<Post>> {
   const res = await fetch(`${BASE}/posts?page=${page}&per_page=15`);
-  return handleResponse<{
-    data: any[];
-    current_page: number;
-    last_page: number;
-    total: number;
-  }>(res);
+  return res.json();
 }
 ```
 
 ### Show post (public)
 
 ```typescript
-async function getPost(id: number) {
+async function getPost(id: number): Promise<Post> {
   const res = await fetch(`${BASE}/posts/${id}`);
-  return handleResponse(res);
+  return res.json();
 }
 ```
 
@@ -164,10 +197,10 @@ async function getPost(id: number) {
 async function createPost(title: string, body: string) {
   const res = await fetch(`${BASE}/posts`, {
     method: 'POST',
-    headers: headers(),
+    headers: { ...authHeaders(), 'Content-Type': 'application/json' },
     body: JSON.stringify({ title, body }),
   });
-  return handleResponse(res);
+  return res.json() as Promise<{ message: string; post: Post }>;
 }
 ```
 
@@ -177,31 +210,31 @@ async function createPost(title: string, body: string) {
 async function updatePost(id: number, data: { title?: string; body?: string }) {
   const res = await fetch(`${BASE}/posts/${id}`, {
     method: 'PUT',
-    headers: headers(),
+    headers: { ...authHeaders(), 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
   });
-  return handleResponse(res);
+  return res.json() as Promise<{ message: string; post: Post }>;
 }
 ```
 
 ### Delete post
 
 ```typescript
-async function deletePost(id: number) {
+async function deletePost(id: number): Promise<MessageResponse> {
   const res = await fetch(`${BASE}/posts/${id}`, {
     method: 'DELETE',
-    headers: headers(),
+    headers: authHeaders(),
   });
-  return handleResponse(res);
+  return res.json();
 }
 ```
 
 ### Timeline (friends' posts)
 
 ```typescript
-async function getTimeline() {
-  const res = await fetch(`${BASE}/timeline`, { headers: headers() });
-  return handleResponse(res);
+async function getTimeline(): Promise<PaginatedResponse<Post>> {
+  const res = await fetch(`${BASE}/timeline`, { headers: authHeaders() });
+  return res.json();
 }
 ```
 
@@ -212,36 +245,36 @@ async function getTimeline() {
 ### Toggle like
 
 ```typescript
-async function toggleLike(postId: number) {
+async function toggleLike(postId: number): Promise<LikeToggleResponse> {
   const res = await fetch(`${BASE}/posts/${postId}/toggle-like`, {
     method: 'POST',
-    headers: headers(),
+    headers: authHeaders(),
   });
-  return handleResponse<{ liked: boolean; likes_count: number }>(res);
+  return res.json();
 }
 ```
 
 ### Like
 
 ```typescript
-async function likePost(postId: number) {
+async function likePost(postId: number): Promise<{ message: string; likes_count: number }> {
   const res = await fetch(`${BASE}/posts/${postId}/like`, {
     method: 'POST',
-    headers: headers(),
+    headers: authHeaders(),
   });
-  return handleResponse(res);
+  return res.json();
 }
 ```
 
 ### Unlike
 
 ```typescript
-async function unlikePost(postId: number) {
+async function unlikePost(postId: number): Promise<{ message: string; likes_count: number }> {
   const res = await fetch(`${BASE}/posts/${postId}/like`, {
     method: 'DELETE',
-    headers: headers(),
+    headers: authHeaders(),
   });
-  return handleResponse(res);
+  return res.json();
 }
 ```
 
@@ -252,11 +285,11 @@ async function unlikePost(postId: number) {
 ### List comments
 
 ```typescript
-async function getComments(postId: number) {
+async function getComments(postId: number): Promise<PaginatedResponse<Comment>> {
   const res = await fetch(`${BASE}/posts/${postId}/comments`, {
-    headers: headers(),
+    headers: authHeaders(),
   });
-  return handleResponse(res);
+  return res.json();
 }
 ```
 
@@ -266,22 +299,22 @@ async function getComments(postId: number) {
 async function addComment(postId: number, body: string) {
   const res = await fetch(`${BASE}/posts/${postId}/comments`, {
     method: 'POST',
-    headers: headers(),
+    headers: { ...authHeaders(), 'Content-Type': 'application/json' },
     body: JSON.stringify({ body }),
   });
-  return handleResponse(res);
+  return res.json() as Promise<{ message: string; comment: Comment }>;
 }
 ```
 
 ### Delete comment
 
 ```typescript
-async function deleteComment(postId: number, commentId: number) {
+async function deleteComment(postId: number, commentId: number): Promise<MessageResponse> {
   const res = await fetch(`${BASE}/posts/${postId}/comments/${commentId}`, {
     method: 'DELETE',
-    headers: headers(),
+    headers: authHeaders(),
   });
-  return handleResponse(res);
+  return res.json();
 }
 ```
 
@@ -295,20 +328,20 @@ async function deleteComment(postId: number, commentId: number) {
 async function sharePost(postId: number, platform?: string) {
   const res = await fetch(`${BASE}/posts/${postId}/share`, {
     method: 'POST',
-    headers: headers(),
+    headers: { ...authHeaders(), 'Content-Type': 'application/json' },
     body: JSON.stringify({ platform }),
   });
-  return handleResponse(res);
+  return res.json() as Promise<{ message: string; shares_count: number }>;
 }
 ```
 
 ### Share count (public)
 
 ```typescript
-async function getShareCount(postId: number, platform?: string) {
+async function getShareCount(postId: number, platform?: string): Promise<ShareCountResponse> {
   const query = platform ? `?platform=${platform}` : '';
   const res = await fetch(`${BASE}/posts/${postId}/share-count${query}`);
-  return handleResponse<{ shares_count: number }>(res);
+  return res.json();
 }
 ```
 
@@ -319,19 +352,19 @@ async function getShareCount(postId: number, platform?: string) {
 ### List users with search
 
 ```typescript
-async function getUsers(search?: string) {
+async function getUsers(search?: string): Promise<PaginatedResponse<User>> {
   const query = search ? `?search=${encodeURIComponent(search)}` : '';
-  const res = await fetch(`${BASE}/users${query}`, { headers: headers() });
-  return handleResponse(res);
+  const res = await fetch(`${BASE}/users${query}`, { headers: authHeaders() });
+  return res.json();
 }
 ```
 
 ### Show user
 
 ```typescript
-async function getUser(id: number) {
-  const res = await fetch(`${BASE}/users/${id}`, { headers: headers() });
-  return handleResponse(res);
+async function getUser(id: number): Promise<User> {
+  const res = await fetch(`${BASE}/users/${id}`, { headers: authHeaders() });
+  return res.json();
 }
 ```
 
@@ -342,105 +375,165 @@ async function getUser(id: number) {
 ### Send request
 
 ```typescript
-async function sendFriendRequest(userId: number) {
+async function sendFriendRequest(userId: number): Promise<MessageResponse> {
   const res = await fetch(`${BASE}/friend-request/${userId}`, {
     method: 'POST',
-    headers: headers(),
+    headers: authHeaders(),
   });
-  return handleResponse(res);
+  return res.json();
 }
 ```
 
 ### Accept request
 
 ```typescript
-async function acceptFriendRequest(userId: number) {
+async function acceptFriendRequest(userId: number): Promise<MessageResponse> {
   const res = await fetch(`${BASE}/friend-request/${userId}/accept`, {
     method: 'POST',
-    headers: headers(),
+    headers: authHeaders(),
   });
-  return handleResponse(res);
+  return res.json();
 }
 ```
 
 ### Reject request
 
 ```typescript
-async function rejectFriendRequest(userId: number) {
+async function rejectFriendRequest(userId: number): Promise<MessageResponse> {
   const res = await fetch(`${BASE}/friend-request/${userId}`, {
     method: 'DELETE',
-    headers: headers(),
+    headers: authHeaders(),
   });
-  return handleResponse(res);
+  return res.json();
 }
 ```
 
 ### Remove friend
 
 ```typescript
-async function removeFriend(userId: number) {
+async function removeFriend(userId: number): Promise<MessageResponse> {
   const res = await fetch(`${BASE}/friends/${userId}`, {
     method: 'DELETE',
-    headers: headers(),
+    headers: authHeaders(),
   });
-  return handleResponse(res);
+  return res.json();
 }
 ```
 
 ### List friends
 
 ```typescript
-async function getFriends() {
-  const res = await fetch(`${BASE}/friends`, { headers: headers() });
-  return handleResponse(res);
+async function getFriends(): Promise<PaginatedResponse<User>> {
+  const res = await fetch(`${BASE}/friends`, { headers: authHeaders() });
+  return res.json();
 }
 ```
 
 ### Pending requests (received)
 
 ```typescript
-async function getPendingRequests() {
-  const res = await fetch(`${BASE}/friend-requests/pending`, { headers: headers() });
-  return handleResponse(res);
+async function getPendingRequests(): Promise<PaginatedResponse<import('../types').Friendship>> {
+  const res = await fetch(`${BASE}/friend-requests/pending`, { headers: authHeaders() });
+  return res.json();
 }
 ```
 
 ### Sent requests
 
 ```typescript
-async function getSentRequests() {
-  const res = await fetch(`${BASE}/friend-requests/sent`, { headers: headers() });
-  return handleResponse(res);
+async function getSentRequests(): Promise<PaginatedResponse<import('../types').Friendship>> {
+  const res = await fetch(`${BASE}/friend-requests/sent`, { headers: authHeaders() });
+  return res.json();
 }
 ```
 
 ---
 
-## Full example: login then fetch timeline
+## Usage in a React component
 
-```typescript
-async function main() {
-  // 1. Login
-  const { token: t } = await login('student@test.com', 'password');
-  console.log('Logged in, token:', t);
+```tsx
+import { useEffect, useState } from 'react'
+import type { Post, PaginatedResponse } from '../types'
 
-  // 2. Get timeline
-  const timeline = await getTimeline();
-  console.log(`Friends posted ${timeline.total} posts`);
+const BASE = 'https://courses.xrow.asia/api'
 
-  // 3. Like the first post
-  if (timeline.data.length > 0) {
-    const first = timeline.data[0];
-    const result = await toggleLike(first.id);
-    console.log(result.liked ? 'Liked!' : 'Unliked!');
-  }
+export default function PostsPage() {
+  const [data, setData] = useState<PaginatedResponse<Post> | null>(null)
+  const [page, setPage] = useState(1)
 
-  // 4. Logout
-  await logout();
-  console.log('Logged out');
+  useEffect(() => {
+    fetch(`${BASE}/posts?page=${page}&per_page=15`)
+      .then(r => r.json() as Promise<PaginatedResponse<Post>>)
+      .then(setData)
+  }, [page])
+
+  if (!data) return <p>Loading...</p>
+
+  return (
+    <div>
+      {data.data.map(post => (
+        <div key={post.id}>
+          <h3>{post.title}</h3>
+          <p>{post.body}</p>
+          <span>♥ {post.likes_count} 💬 {post.comments_count}</span>
+        </div>
+      ))}
+    </div>
+  )
+}
+```
+
+### Auth pages (login / register)
+
+```tsx
+import { useState } from 'react'
+import { useNavigate, Link } from 'react-router-dom'
+import type { User } from '../types'
+
+const BASE = 'https://courses.xrow.asia/api'
+
+interface LoginResponse {
+  message: string
+  token: string
+  user: User
 }
 
-main().catch(err => console.error('Error:', err));
+export default function LoginPage() {
+  const navigate = useNavigate()
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [error, setError] = useState('')
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setError('')
+    try {
+      const res = await fetch(`${BASE}/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      })
+      const data = await res.json() as LoginResponse | Record<string, any>
+      if (!res.ok) {
+        setError(data.error || data.message || 'Login failed')
+        return
+      }
+      localStorage.setItem('api_token', data.token)
+      navigate('/posts')
+    } catch {
+      setError('Login failed')
+    }
+  }
+
+  return (
+    <form onSubmit={handleSubmit}>
+      {error && <p style={{ color: 'red' }}>{error}</p>}
+      <input value={email} onChange={e => setEmail(e.target.value)} placeholder="Email" required />
+      <input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="Password" required />
+      <button type="submit">Login</button>
+    </form>
+  )
+}
 ```
 
 ---
@@ -448,181 +541,43 @@ main().catch(err => console.error('Error:', err));
 ## Error handling pattern
 
 ```typescript
-async function safeFetch<T>(fn: () => Promise<T>): Promise<{ ok: true; data: T } | { ok: false; error: any }> {
-  try {
-    const data = await fn();
-    return { ok: true, data };
-  } catch (err) {
-    return { ok: false, error: err };
-  }
+// Error responses come in different shapes:
+//   401: { error: "Invalid credentials" }
+//   422: { email: ["The email field is required."] }
+//   422: { status: false, message: "The email has already been taken." }
+
+// Extract a user-friendly message from any error shape:
+function getError(data: Record<string, any>): string {
+  return data.message || data.error || Object.values(data).flat().join(', ') || 'Something went wrong'
 }
 
-// Usage
-const result = await safeFetch(() => login('student@test.com', 'password'));
-if (result.ok) {
-  console.log('Token:', result.data.token);
-} else {
-  console.error('Login failed:', result.error);
+// Usage:
+const res = await fetch(`${BASE}/login`, { ... })
+const data = await res.json()
+if (!res.ok) {
+  setError(getError(data))
+  return
 }
 ```
 
 ---
 
-## localStorage in React
-
-### Auth context with localStorage persistence
-
-```tsx
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-
-interface AuthContextType {
-  token: string | null;
-  user: any | null;
-  login: (email: string, password: string) => Promise<void>;
-  register: (name: string, email: string, password: string) => Promise<void>;
-  logout: () => Promise<void>;
-  loading: boolean;
-}
-
-const AuthContext = createContext<AuthContextType>(null!);
-
-export function AuthProvider({ children }: { children: ReactNode }) {
-  const [token, setToken] = useState<string | null>(() =>
-    localStorage.getItem('api_token')
-  );
-  const [user, setUser] = useState<any | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  // On mount: if token exists, fetch user profile
-  useEffect(() => {
-    if (token) {
-      fetch('https://courses.xrow.asia/api/me', {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-        .then(r => r.json())
-        .then(u => setUser(u))
-        .catch(() => {
-          localStorage.removeItem('api_token');
-          setToken(null);
-        })
-        .finally(() => setLoading(false));
-    } else {
-      setLoading(false);
-    }
-  }, [token]);
-
-  const login = async (email: string, password: string) => {
-    const res = await fetch('https://courses.xrow.asia/api/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password }),
-    });
-    const data = await res.json();
-    localStorage.setItem('api_token', data.token);
-    setToken(data.token);
-    setUser(data.user);
-  };
-
-  const register = async (name: string, email: string, password: string) => {
-    const res = await fetch('https://courses.xrow.asia/api/register', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, email, password, password_confirmation: password }),
-    });
-    const data = await res.json();
-    localStorage.setItem('api_token', data.token);
-    setToken(data.token);
-    setUser(data.user);
-  };
-
-  const logout = async () => {
-    await fetch('https://courses.xrow.asia/api/logout', {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    localStorage.removeItem('api_token');
-    setToken(null);
-    setUser(null);
-  };
-
-  return (
-    <AuthContext.Provider value={{ token, user, login, register, logout, loading }}>
-      {children}
-    </AuthContext.Provider>
-  );
-}
-
-export function useAuth() {
-  return useContext(AuthContext);
-}
-```
-
-### Usage in components
-
-```tsx
-function LoginPage() {
-  const { login } = useAuth();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      await login(email, password);
-      // Redirect to dashboard — user is now in context
-    } catch (err) {
-      alert('Login failed');
-    }
-  };
-
-  return (
-    <form onSubmit={handleSubmit}>
-      <input value={email} onChange={e => setEmail(e.target.value)} placeholder="Email" />
-      <input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="Password" />
-      <button type="submit">Login</button>
-    </form>
-  );
-}
-```
-
-```tsx
-function PostsPage() {
-  const { token } = useAuth();
-  const [posts, setPosts] = useState<any[]>([]);
-
-  useEffect(() => {
-    fetch('https://courses.xrow.asia/api/posts', {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-      .then(r => r.json())
-      .then(d => setPosts(d.data));
-  }, [token]);
-
-  return (
-    <div>
-      {posts.map(post => (
-        <div key={post.id}>
-          <h3>{post.title}</h3>
-          <p>{post.body}</p>
-          <span>♥ {post.likes_count}  💬 {post.comments_count}</span>
-        </div>
-      ))}
-    </div>
-  );
-}
-```
-
-### Sync across browser tabs
+## localStorage helpers
 
 ```typescript
+// Save token (after login/register)
+localStorage.setItem('api_token', data.token);
+
+// Read token (for auth headers)
+localStorage.getItem('api_token');
+
+// Remove token (on logout)
+localStorage.removeItem('api_token');
+
 // Listen for token changes from other tabs
 window.addEventListener('storage', (e) => {
   if (e.key === 'api_token') {
-    if (e.newValue) {
-      token = e.newValue;   // another tab logged in
-    } else {
-      token = null;          // another tab logged out
-    }
+    // another tab logged in or out
   }
 });
 ```

@@ -1,9 +1,16 @@
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
-import { useAuth } from '../context/AuthContext'
+import type { User } from '../types'
+
+const BASE = 'https://courses.xrow.asia/api'
+
+interface LoginResponse {
+  message: string
+  token: string
+  user: User
+}
 
 export default function LoginPage() {
-  const { login } = useAuth()
   const navigate = useNavigate()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -15,10 +22,20 @@ export default function LoginPage() {
     setError('')
     setLoading(true)
     try {
-      await login(email, password)
+      const res = await fetch(`${BASE}/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      })
+      const data = await res.json() as LoginResponse | Record<string, any>
+      if (!res.ok) {
+        setError(data.error || data.message || Object.values(data).flat().join(', ') || 'Login failed')
+        return
+      }
+      localStorage.setItem('api_token', data.token)
       navigate('/posts')
-    } catch (err: any) {
-      setError(err.error || 'Login failed. Check your email and password.')
+    } catch {
+      setError('Login failed')
     } finally {
       setLoading(false)
     }
