@@ -4,6 +4,34 @@ No libraries needed — `fetch()` is built into every browser and Node 18+.
 
 ---
 
+## Basic example
+
+```typescript
+async function checkStatus() {
+  try {
+    const response = await fetch('https://api.example.com/data');
+    
+    // Access the numerical status code (e.g., 200, 404, 500)
+    console.log(response.status); 
+    
+    // Optional: Access the status text message (e.g., "OK", "Not Found")
+    console.log(response.statusText); 
+
+    if (!response.ok) {
+      // response.ok is true if the status is 200-299
+      throw new Error(`HTTP error! Status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Fetch failed:', error);
+  }
+}
+```
+
+---
+
 ## Setup
 
 ```typescript
