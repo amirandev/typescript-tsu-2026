@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="ka">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>React + JWT + TypeScript — პრეზენტაცია</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fontsource-georgia@4.5.4/index.css" />
+  <style>
+    @import url("//cdn.web-fonts.ge/fonts/bpg-arial/css/bpg-arial.min.css");
+
+    :root {
+      --bg1: #0b1020;
+      --bg2: #1a1f3a;
+      --accent: #60a5fa;
+      --accent2: #a78bfa;
+      --code-bg: #0d1117;
+      --code-text: #e6edf3;
+    }
+
+    html,
+    body {
+      height: 100%;
+      font-family: "BPG Arial", sans-serif;
+    }
+
+    body {
+      font-family: 'Georgia', 'Noto Sans Georgian', system-ui, sans-serif;
+      background: radial-gradient(1200px 800px at 10% 10%, #1e2a55 0%, var(--bg1) 50%, #05070f 100%);
+      color: #e5e7eb;
+      overflow: hidden;
+      font-family: "BPG Arial", sans-serif;
+    }
+
+    .slide {
+      opacity: 0;
+      transform: translateX(40px) scale(.98);
+      transition: opacity .45s ease, transform .45s ease;
+      pointer-events: none;
+    }
+
+    .slide.active {
+      opacity: 1;
+      transform: translateX(0) scale(1);
+      pointer-events: auto;
+    }
+
+    .slide.prev {
+      opacity: 0;
+      transform: translateX(-40px) scale(.98);
+    }
+
+    pre.code {
+      background: var(--code-bg);
+      color: var(--code-text);
+      border-radius: 14px;
+      padding: 18px 20px;
+      font-family: 'Fira Code', 'JetBrains Mono', ui-monospace, monospace;
+      font-size: 13.5px;
+      line-height: 1.55;
+      overflow: auto;
+      border: 1px solid #222a3d;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, .4);
+    }
+
+    .tok-k {
+      color: #ff7b72
+    }
+
+    .tok-s {
+      color: #a5d6ff
+    }
+
+    .tok-c {
+      color: #8b949e;
+      font-style: italic
+    }
+
+    .tok-f {
+      color: #d2a8ff
+    }
+
+    .tok-n {
+      color: #79c0ff
+    }
+
+    .tok-t {
+      color: #ffa657
+    }
+
+    .tok-p {
+      color: #c9d1d9
+    }
+
+    .chip {
+      background: linear-gradient(135deg, rgba(96, 165, 250, .15), rgba(167, 139, 250, .15));
+      border: 1px solid rgba(167, 139, 250, .35);
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-size: 12px;
+      letter-spacing: .3px;
+    }
+
+    .glow {
+      background: linear-gradient(135deg, #60a5fa, #a78bfa);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .card {
+      background: rgba(255, 255, 255, .04);
+      border: 1px solid rgba(255, 255, 255, .08);
+      backdrop-filter: blur(8px);
+      border-radius: 16px;
+    }
+
+    .flow-node {
+      background: linear-gradient(135deg, rgba(96, 165, 250, .2), rgba(167, 139, 250, .2));
+      border: 1px solid rgba(167, 139, 250, .4);
+      border-radius: 12px;
+      padding: 10px 14px;
+      font-size: 13px;
+    }
+
+    .arrow {
+      color: #a78bfa;
+      font-size: 22px;
+    }
+
+    .progress-bar {
+      height: 4px;
+      background: linear-gradient(90deg, #60a5fa, #a78bfa);
+      transition: width .4s ease;
+    }
+
+    .btn {
+      background: rgba(255, 255, 255, .06);
+      border: 1px solid rgba(255, 255, 255, .12);
+      padding: 10px 16px;
+      border-radius: 10px;
+      transition: all .2s;
+    }
+
+    .btn:hover {
+      background: rgba(255, 255, 255, .12);
+      transform: translateY(-1px);
+    }
+
+    .btn:disabled {
+      opacity: .35;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .kbd {
+      background: #1f2937;
+      border: 1px solid #374151;
+      border-bottom-width: 2px;
+      padding: 2px 7px;
+      border-radius: 6px;
+      font-family: monospace;
+      font-size: 11px;
+    }
+
+    .bullet::before {
+      content: "▸";
+      color: #a78bfa;
+      margin-right: 8px;
+    }
+
+    .bullet {
+      display: flex;
+      align-items: flex-start;
+      gap: 4px;
+      margin: 8px 0;
+    }
+
+    .diagram {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .jwt-block {
+      background: #0d1117;
+      border: 1px solid #30363d;
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-family: monospace;
+      font-size: 12px;
+    }
+
+    .jwt-h {
+      color: #ff7b72
+    }
+
+    .jwt-p {
+      color: #a5d6ff
+    }
+
+    .jwt-s {
+      color: #7ee787
+    }
+
+    .divider {
+      color: #484f58
+    }
+
+    @keyframes float {
+
+      0%,
+      100% {
+        transform: translateY(0)
+      }
+
+      50% {
+        transform: translateY(-8px)
+      }
+    }
+
+    .float {
+      animation: float 4s ease-in-out infinite;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="w-screen h-screen flex flex-col">
+
+    <!-- Top bar -->
+    <header class="flex items-center justify-between px-6 py-3 border-b border-white/10">
+      <div class="flex items-center gap-3">
+        <div
+          class="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center font-bold">
+          R</div>
+        <div class="text-sm opacity-80">React + JWT + TypeScript</div>
+      </div>
+      <div class="flex items-center gap-3 text-xs opacity-70">
+        <span id="counter">1 / 13</span>
+        <span class="hidden sm:inline">ნავიგაცია: <span class="kbd">←</span> <span class="kbd">→</span> <span
+            class="kbd">Space</span></span>
+      </div>
+    </header>
+
+    <!-- Progress -->
+    <div class="w-full bg-white/5">
+      <div id="progress" class="progress-bar" style="width:7.7%"></div>
+    </div>
+
+    <!-- Slides container -->
+    <main id="stage" class="flex-1 relative overflow-hidden">
+
+      <!-- SLIDE 1: Title -->
+      <section class="slide active absolute inset-0 flex items-center justify-center p-8">
+        <div class="text-center max-w-3xl">
+          <div class="chip inline-block mb-6">პრეზენტაცია · 2026</div>
+          <h1 class="text-5xl md:text-6xl font-bold mb-6 leading-tight">
+            <span class="glow">React-ში JWT-სთან</span><br />
+            მუშაობა და TypeScript
+          </h1>
+          <p class="text-lg opacity-75 mb-8">
+            ინტერფეისები, ტიპიზაცია, GET/POST მოთხოვნები, მონაცემთა ბაინდინგი და Layout/Children პატერნი
+          </p>
+          <div class="flex flex-wrap justify-center gap-2">
+            <span class="chip">⚛️ React</span>
+            <span class="chip">🔐 JWT</span>
+            <span class="chip">📘 TypeScript</span>
+            <span class="chip">🌐 Fetch API</span>
+            <span class="chip">🧩 Layout & Slots</span>
+          </div>
+          <div class="mt-10 text-sm opacity-60">დააჭირე <span class="kbd">→</span> დასაწყებად</div>
+        </div>
+      </section>
+
+      <!-- SLIDE 2: Agenda -->
+      <section class="slide absolute inset-0 flex items-center justify-center p-8">
+        <div class="max-w-5xl w-full">
+          <h2 class="text-3xl font-bold mb-2">შინაარსი</h2>
+          <p class="opacity-60 mb-8">რას ვისწავლოთ ამ პრეზენტაციაში</p>
+          <div class="grid md:grid-cols-2 gap-4">
+            <div class="card p-5">
+              <div class="text-2xl mb-2">🔑</div>
+              <h3 class="font-semibold mb-1">JWT რა არის?</h3>
+              <p class="text-sm opacity-70">სტრუქტურა, ნაკადი და როლი ავტორიზაციაში</p>
+            </div>
+            <div class="card p-5">
+              <div class="text-2xl mb-2">📘</div>
+              <h3 class="font-semibold mb-1">TypeScript ინტერფეისები</h3>
+              <p class="text-sm opacity-70">API-ს მონაცემების ტიპიზაცია</p>
+            </div>
+            <div class="card p-5">
+              <div class="text-2xl mb-2">🌐</div>
+              <h3 class="font-semibold mb-1">GET / POST fetch</h3>
+              <p class="text-sm opacity-70">ტიპიზებული მოთხოვნები და პასუხები</p>
+            </div>
+            <div class="card p-5">
+              <div class="text-2xl mb-2">📦</div>
+              <h3 class="font-semibold mb-1">POST-ის სხეულის ტიპი</h3>
+              <p class="text-sm opacity-70">როგორ გადავცეთ ტიპიზებული მონაცემები</p>
+            </div>
+            <div class="card p-5">
+              <div class="text-2xl mb-2">⚛️</div>
+              <h3 class="font-semibold mb-1">Data Binding</h3>
+              <p class="text-sm opacity-70">მონაცემების ბაინდინგი React კომპონენტებში</p>
+            </div>
+            <div class="card p-5">
+              <div class="text-2xl mb-2">🧩</div>
+              <h3 class="font-semibold mb-1">Layout & Children</h3>
+              <p class="text-sm opacity-70">განლაგების კომპონენტები და სლოტები</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SLIDE 3: What is JWT -->
+      <section class="slide absolute inset-0 flex items-center justify-center p-8">
+        <div class="max-w-5xl w-full">
+          <div class="chip inline-block mb-3">01 · JWT</div>
+          <h2 class="text-3xl font-bold mb-6">რა არის JWT?</h2>
+          <div class="grid md:grid-cols-2 gap-6">
+            <div class="card p-6">
+              <h3 class="font-semibold mb-3 text-blue-300">JSON Web Token</h3>
+              <div class="bullet">კომპაქტური, URL-უსაფრთხო ტოკენი</div>
+              <div class="bullet">სახელი → პრეტენზიების (claims) გადაცემა</div>
+              <div class="bullet">ხელმოწერილი (HMAC ან RSA/ECDSA)</div>
+              <div class="bullet">გამოიყენება <b>stateless</b> ავტორიზაციისთვის</div>
+              <div class="bullet">სერვერი არ ინახავს სესიას — ტოკენი თავად არის „სესია"</div>
+            </div>
+            <div class="card p-6">
+              <h3 class="font-semibold mb-3 text-purple-300">სტრუქტურა: 3 ნაწილი</h3>
+              <div class="jwt-block mb-3">
+                <span class="jwt-h">header</span><span class="divider">.</span><span class="jwt-p">payload</span><span
+                  class="divider">.</span><span class="jwt-s">signature</span>
+              </div>
+              <div class="text-sm space-y-2 opacity-85">
+                <div><span class="jwt-h">●</span> <b>Header</b> — ალგორითმი და ტიპი</div>
+                <div><span class="jwt-p">●</span> <b>Payload</b> — claims (sub, exp, iat…)</div>
+                <div><span class="jwt-s">●</span> <b>Signature</b> — header + payload + secret</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SLIDE 4: JWT Flow -->
+      <section class="slide absolute inset-0 flex items-center justify-center p-8">
+        <div class="max-w-5xl w-full">
+          <div class="chip inline-block mb-3">02 · Flow</div>
+          <h2 class="text-3xl font-bold mb-6">JWT ავტორიზაციის ნაკადი</h2>
+          <div class="card p-6 mb-6">
+            <div class="diagram">
+              <div class="flow-node">👤 მომხმარებელი<br /><span class="text-xs opacity-70">login + password</span></div>
+              <div class="arrow">→</div>
+              <div class="flow-node">🌐 API<br /><span class="text-xs opacity-70">POST /login</span></div>
+              <div class="arrow">→</div>
+              <div class="flow-node float">🎟️ JWT ტოკენი<br /><span
+                  class="text-xs opacity-70">header.payload.sig</span></div>
+              <div class="arrow">→</div>
+              <div class="flow-node">💾 localStorage<br /><span class="text-xs opacity-70">ან httpOnly cookie</span>
+              </div>
+            </div>
+            <div class="diagram mt-6">
+              <div class="flow-node">💾 ტოკენი</div>
+              <div class="arrow">→</div>
+              <div class="flow-node">📡 Header: Authorization<br /><span class="text-xs opacity-70">Bearer
+                  &lt;token&gt;</span></div>
+              <div class="arrow">→</div>
+              <div class="flow-node">🔒 დაცული API<br /><span class="text-xs opacity-70">GET /me, POST /orders</span>
+              </div>
+            </div>
+          </div>
+          <p class="text-sm opacity-70 text-center">ტოკენი იგზავნება ყოველ მოთხოვნაზე <code
+              class="bg-white/10 px-2 py-0.5 rounded">Authorization: Bearer &lt;token&gt;</code> ჰედერით</p>
+        </div>
+      </section>
+
+      <!-- SLIDE 5: TypeScript interfaces -->
+      <section class="slide absolute inset-0 flex items-center justify-center p-8">
+        <div class="max-w-6xl w-full">
+          <div class="chip inline-block mb-3">03 · Types</div>
+          <h2 class="text-3xl font-bold mb-6">API მონაცემების ინტერფეისები</h2>
+          <div class="grid md:grid-cols-2 gap-6">
+            <pre class="code"><span class="tok-c">// types/auth.ts</span>
+<span class="tok-k">export interface</span> <span class="tok-t">LoginRequest</span> {
+  email: <span class="tok-t">string</span>;
+  password: <span class="tok-t">string</span>;
+}
+
+<span class="tok-k">export interface</span> <span class="tok-t">LoginResponse</span> {
+  accessToken: <span class="tok-t">string</span>;
+  refreshToken: <span class="tok-t">string</span>;
+  expiresIn: <span class="tok-t">number</span>;
+  user: <span class="tok-t">User</span>;
+}
+
+<span class="tok-k">export interface</span> <span class="tok-t">User</span> {
+  id: <span class="tok-t">string</span>;
+  name: <span class="tok-t">string</span>;
+  email: <span class="tok-t">string</span>;
+  role: <span class="tok-s">"admin"</span> | <span class="tok-s">"user"</span>;
+}</pre>
+            <div class="space-y-4">
+              <div class="card p-5">
+                <h3 class="font-semibold mb-2 text-blue-300">რატომ ინტერფეისები?</h3>
+                <div class="bullet text-sm">ავტო-შევსება IDE-ში</div>
+                <div class="bullet text-sm">კომპილაციის დროს შეცდომების აღმოჩენა</div>
+                <div class="bullet text-sm">თვითდოკუმენტაცია კოდში</div>
+                <div class="bullet text-sm">უსაფრთხო refactoring</div>
+              </div>
+              <div class="card p-5">
+                <h3 class="font-semibold mb-2 text-purple-300">საუკეთესო პრაქტიკა</h3>
+                <div class="bullet text-sm">ცალკე ფაილი: <code class="bg-white/10 px-1 rounded">types/api.ts</code>
+                </div>
+                <div class="bullet text-sm">სახელები: <code class="bg-white/10 px-1 rounded">XxxRequest</code> / <code
+                    class="bg-white/10 px-1 rounded">XxxResponse</code></div>
+                <div class="bullet text-sm">გამოიყენე <code class="bg-white/10 px-1 rounded">readonly</code> სადაც
+                  საჭიროა</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SLIDE 6: Typed fetch GET -->
+      <section class="slide absolute inset-0 flex items-center justify-center p-8">
+        <div class="max-w-6xl w-full">
+          <div class="chip inline-block mb-3">04 · GET</div>
+          <h2 class="text-3xl font-bold mb-6">ტიპიზებული <span class="glow">fetch GET</span></h2>
+          <div class="grid md:grid-cols-5 gap-6">
+            <pre class="code md:col-span-3"><span class="tok-c">// api/users.ts</span>
+<span class="tok-k">import</span> { <span class="tok-t">User</span> } <span class="tok-k">from</span> <span class="tok-s">"../types"</span>;
+
+<span class="tok-k">export async function</span> <span class="tok-f">getUsers</span>(): <span class="tok-t">Promise</span>&lt;<span class="tok-t">User</span>[]&gt; {
+  <span class="tok-k">const</span> token = localStorage.<span class="tok-f">getItem</span>(<span class="tok-s">"token"</span>);
+
+  <span class="tok-k">const</span> res = <span class="tok-k">await</span> <span class="tok-f">fetch</span>(<span class="tok-s">"/api/users"</span>, {
+    method: <span class="tok-s">"GET"</span>,
+    headers: {
+      <span class="tok-s">"Content-Type"</span>: <span class="tok-s">"application/json"</span>,
+      <span class="tok-s">"Authorization"</span>: <span class="tok-s">`Bearer ${token}`</span>,
+    },
+  });
+
+  <span class="tok-k">if</span> (!res.ok) <span class="tok-k">throw new</span> <span class="tok-t">Error</span>(<span class="tok-s">"Failed to fetch"</span>);
+
+  <span class="tok-c">// ტიპიზებული პარსინგი</span>
+  <span class="tok-k">const</span> data: <span class="tok-t">User</span>[] = <span class="tok-k">await</span> res.<span class="tok-f">json</span>();
+  <span class="tok-k">return</span> data;
+}</pre>
+            <div class="md:col-span-2 space-y-3">
+              <div class="card p-4">
+                <div class="text-xs opacity-60 mb-1">დაბრუნების ტიპი</div>
+                <div class="font-mono text-sm text-blue-300">Promise&lt;User[]&gt;</div>
+              </div>
+              <div class="card p-4">
+                <div class="text-xs opacity-60 mb-1">ჰედერში ტოკენი</div>
+                <div class="font-mono text-xs text-purple-300">Authorization: Bearer ...</div>
+              </div>
+              <div class="card p-4">
+                <div class="text-xs opacity-60 mb-1">პასუხის ტიპი</div>
+                <div class="font-mono text-sm text-green-300">data: User[]</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SLIDE 7: Typed fetch POST -->
+      <section class="slide absolute inset-0 flex items-center justify-center p-8">
+        <div class="max-w-6xl w-full">
+          <div class="chip inline-block mb-3">05 · POST</div>
+          <h2 class="text-3xl font-bold mb-6">ტიპიზებული <span class="glow">fetch POST</span></h2>
+          <div class="grid md:grid-cols-2 gap-6">
+            <pre class="code"><span class="tok-c">// api/auth.ts</span>
+<span class="tok-k">import</span> { <span class="tok-t">LoginRequest</span>, <span class="tok-t">LoginResponse</span> } <span class="tok-k">from</span> <span class="tok-s">"../types"</span>;
+
+<span class="tok-k">export async function</span> <span class="tok-f">login</span>(
+  body: <span class="tok-t">LoginRequest</span>
+): <span class="tok-t">Promise</span>&lt;<span class="tok-t">LoginResponse</span>&gt; {
+  <span class="tok-k">const</span> res = <span class="tok-k">await</span> <span class="tok-f">fetch</span>(<span class="tok-s">"/api/auth/login"</span>, {
+    method: <span class="tok-s">"POST"</span>,
+    headers: { <span class="tok-s">"Content-Type"</span>: <span class="tok-s">"application/json"</span> },
+    body: <span class="tok-t">JSON</span>.<span class="tok-f">stringify</span>(body),
+  });
+
+  <span class="tok-k">if</span> (!res.ok) {
+    <span class="tok-k">const</span> err = <span class="tok-k">await</span> res.<span class="tok-f">json</span>();
+    <span class="tok-k">throw new</span> <span class="tok-t">Error</span>(err.message);
+  }
+  <span class="tok-k">return</span> res.<span class="tok-f">json</span>();
+}</pre>
+            <pre class="code"><span class="tok-c">// გამოძახება</span>
+<span class="tok-k">const</span> result = <span class="tok-k">await</span> <span class="tok-f">login</span>({
+  email: <span class="tok-s">"user@mail.com"</span>,
+  password: <span class="tok-s">"secret123"</span>,
+});
+
+localStorage.<span class="tok-f">setItem</span>(<span class="tok-s">"token"</span>, result.accessToken);
+
+<span class="tok-c">// result.user — სრულად ტიპიზებულია</span>
+<span class="tok-f">console.log</span>(result.user.name);
+<span class="tok-f">console.log</span>(result.user.role);</pre>
+          </div>
+        </div>
+      </section>
+
+      <!-- SLIDE 8: POST body types -->
+      <section class="slide absolute inset-0 flex items-center justify-center p-8">
+        <div class="max-w-6xl w-full">
+          <div class="chip inline-block mb-3">06 · Body</div>
+          <h2 class="text-3xl font-bold mb-6">POST სხეულის ტიპიზაცია</h2>
+          <div class="grid md:grid-cols-2 gap-6">
+            <pre class="code"><span class="tok-c">// types/product.ts</span>
+<span class="tok-k">export interface</span> <span class="tok-t">CreateProductDto</span> {
+  name: <span class="tok-t">string</span>;
+  price: <span class="tok-t">number</span>;
+  category: <span class="tok-s">"electronics"</span> | <span class="tok-s">"books"</span> | <span class="tok-s">"clothing"</span>;
+  tags?: <span class="tok-t">string</span>[];
+}
+
+<span class="tok-k">export interface</span> <span class="tok-t">Product</span> <span class="tok-k">extends</span> <span class="tok-t">CreateProductDto</span> {
+  id: <span class="tok-t">string</span>;
+  createdAt: <span class="tok-t">string</span>;
+}</pre>
+            <pre class="code"><span class="tok-c">// api/products.ts</span>
+<span class="tok-k">export async function</span> <span class="tok-f">createProduct</span>(
+  dto: <span class="tok-t">CreateProductDto</span>
+): <span class="tok-t">Promise</span>&lt;<span class="tok-t">Product</span>&gt; {
+  <span class="tok-k">const</span> token = localStorage.<span class="tok-f">getItem</span>(<span class="tok-s">"token"</span>);
+  <span class="tok-k">const</span> res = <span class="tok-k">await</span> <span class="tok-f">fetch</span>(<span class="tok-s">"/api/products"</span>, {
+    method: <span class="tok-s">"POST"</span>,
+    headers: {
+      <span class="tok-s">"Content-Type"</span>: <span class="tok-s">"application/json"</span>,
+      <span class="tok-s">"Authorization"</span>: <span class="tok-s">`Bearer ${token}`</span>,
+    },
+    body: <span class="tok-t">JSON</span>.<span class="tok-f">stringify</span>(dto),
+  });
+  <span class="tok-k">return</span> res.<span class="tok-f">json</span>();
+}</pre>
+          </div>
+          <div class="mt-5 card p-4 text-sm">
+            <b class="text-purple-300">💡 პატერნი:</b> <code class="bg-white/10 px-1 rounded">CreateXxxDto</code> → რას
+            ვაგზავნით · <code class="bg-white/10 px-1 rounded">Xxx</code> → რას ვიღებთ · <code
+              class="bg-white/10 px-1 rounded">extends</code> → დრაის რეიზი
+          </div>
+        </div>
+      </section>
+
+      <!-- SLIDE 9: Data binding -->
+      <section class="slide absolute inset-0 flex items-center justify-center p-8">
+        <div class="max-w-6xl w-full">
+          <div class="chip inline-block mb-3">07 · Binding</div>
+          <h2 class="text-3xl font-bold mb-6">მონაცემების ბაინდინგი კომპონენტებში</h2>
+          <div class="grid md:grid-cols-2 gap-6">
+            <pre class="code"><span class="tok-c">// components/UserList.tsx</span>
+<span class="tok-k">import</span> { useEffect, useState } <span class="tok-k">from</span> <span class="tok-s">"react"</span>;
+<span class="tok-k">import</span> { <span class="tok-t">User</span> } <span class="tok-k">from</span> <span class="tok-s">"../types"</span>;
+<span class="tok-k">import</span> { getUsers } <span class="tok-k">from</span> <span class="tok-s">"../api/users"</span>;
+
+<span class="tok-k">export function</span> <span class="tok-f">UserList</span>() {
+  <span class="tok-k">const</span> [users, setUsers] = <span class="tok-f">useState</span>&lt;<span class="tok-t">User</span>[]&gt;([]);
+  <span class="tok-k">const</span> [loading, setLoading] = <span class="tok-f">useState</span>(<span class="tok-n">true</span>);
+
+  <span class="tok-f">useEffect</span>(() =&gt; {
+    <span class="tok-f">getUsers</span>().<span class="tok-f">then</span>(setUsers).<span class="tok-f">finally</span>(() =&gt;
+      <span class="tok-f">setLoading</span>(<span class="tok-n">false</span>)
+    );
+  }, []);
+
+  <span class="tok-k">if</span> (loading) <span class="tok-k">return</span> &lt;p&gt;იტვირთება...&lt;/p&gt;;
+
+  <span class="tok-k">return</span> (
+    &lt;ul&gt;
+      {users.<span class="tok-f">map</span>((u) =&gt; (
+        &lt;li key={u.id}&gt;{u.name} — {u.role}&lt;/li&gt;
+      ))}
+    &lt;/ul&gt;
+  );
+}</pre>
+            <div class="space-y-3">
+              <div class="card p-4">
+                <div class="text-xs opacity-60 mb-1">useState ტიპით</div>
+                <div class="font-mono text-sm">useState&lt;User[]&gt;([])</div>
+              </div>
+              <div class="card p-4">
+                <div class="text-xs opacity-60 mb-1">ერთჯერადი ჩატვირთვა</div>
+                <div class="font-mono text-sm">useEffect(() =&gt; ..., [])</div>
+              </div>
+              <div class="card p-4">
+                <div class="text-xs opacity-60 mb-1">Rendering</div>
+                <div class="font-mono text-sm">users.map(u =&gt; ...)</div>
+              </div>
+              <div class="card p-4">
+                <div class="text-xs opacity-60 mb-1">Props-ის ტიპი</div>
+                <div class="font-mono text-sm text-purple-300">interface UserCardProps {'{ user: User }'}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SLIDE 10: Layout component -->
+      <section class="slide absolute inset-0 flex items-center justify-center p-8">
+        <div class="max-w-6xl w-full">
+          <div class="chip inline-block mb-3">08 · Layout</div>
+          <h2 class="text-3xl font-bold mb-6">Layout კომპონენტი</h2>
+          <p class="opacity-70 mb-6">Layout არის კონტეინერი, რომელიც განმეორებად სტრუქტურას ქმნის (header, sidebar,
+            footer).</p>
+          <div class="grid md:grid-cols-2 gap-6">
+            <pre class="code"><span class="tok-c">// layouts/MainLayout.tsx</span>
+<span class="tok-k">import</span> { ReactNode } <span class="tok-k">from</span> <span class="tok-s">"react"</span>;
+<span class="tok-k">import</span> { Sidebar } <span class="tok-k">from</span> <span class="tok-s">"./Sidebar"</span>;
+<span class="tok-k">import</span> { Header } <span class="tok-k">from</span> <span class="tok-s">"./Header"</span>;
+
+<span class="tok-k">interface</span> <span class="tok-t">Props</span> {
+  children: <span class="tok-t">ReactNode</span>;
+  title?: <span class="tok-t">string</span>;
+}
+
+<span class="tok-k">export function</span> <span class="tok-f">MainLayout</span>({ children, title }: <span class="tok-t">Props</span>) {
+  <span class="tok-k">return</span> (
+    &lt;div className=<span class="tok-s">"flex h-screen"</span>&gt;
+      &lt;Sidebar /&gt;
+      &lt;div className=<span class="tok-s">"flex-1 flex flex-col"</span>&gt;
+        &lt;Header title={title} /&gt;
+        &lt;main className=<span class="tok-s">"flex-1 p-6 overflow-auto"</span>&gt;
+          {children}
+        &lt;/main&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  );
+}</pre>
+            <pre class="code"><span class="tok-c">// გამოყენება</span>
+<span class="tok-k">import</span> { MainLayout } <span class="tok-k">from</span> <span class="tok-s">"./layouts/MainLayout"</span>;
+<span class="tok-k">import</span> { Dashboard } <span class="tok-k">from</span> <span class="tok-s">"./pages/Dashboard"</span>;
+
+<span class="tok-k">export function</span> <span class="tok-f">App</span>() {
+  <span class="tok-k">return</span> (
+    &lt;MainLayout title=<span class="tok-s">"Dashboard"</span>&gt;
+      &lt;Dashboard /&gt;
+    &lt;/MainLayout&gt;
+  );
+}</pre>
+          </div>
+        </div>
+      </section>
+
+      <!-- SLIDE 11: Children slots -->
+      <section class="slide absolute inset-0 flex items-center justify-center p-8">
+        <div class="max-w-6xl w-full">
+          <div class="chip inline-block mb-3">09 · Slots</div>
+          <h2 class="text-3xl font-bold mb-6">Layout Slots — <span class="glow">multiple children</span></h2>
+          <p class="opacity-70 mb-6">სახელდებული სლოტები — როცა რამდენიმე არე გვინდა (header, sidebar, content, footer).
+          </p>
+          <div class="grid md:grid-cols-2 gap-6">
+            <pre class="code"><span class="tok-c">// layouts/AppShell.tsx</span>
+<span class="tok-k">interface</span> <span class="tok-t">AppShellProps</span> {
+  header: <span class="tok-t">ReactNode</span>;
+  sidebar: <span class="tok-t">ReactNode</span>;
+  footer?: <span class="tok-t">ReactNode</span>;
+  children: <span class="tok-t">ReactNode</span>; <span class="tok-c">// main slot</span>
+}
+
+<span class="tok-k">export function</span> <span class="tok-f">AppShell</span>({
+  header, sidebar, footer, children
+}: <span class="tok-t">AppShellProps</span>) {
+  <span class="tok-k">return</span> (
+    &lt;div className=<span class="tok-s">"grid grid-cols-[240px_1fr] grid-rows-[auto_1fr_auto] h-screen"</span>&gt;
+      &lt;header className=<span class="tok-s">"col-span-2"</span>&gt;{header}&lt;/header&gt;
+      &lt;aside&gt;{sidebar}&lt;/aside&gt;
+      &lt;main&gt;{children}&lt;/main&gt;
+      {footer &amp;&amp; &lt;footer className=<span class="tok-s">"col-span-2"</span>&gt;{footer}&lt;/footer&gt;}
+    &lt;/div&gt;
+  );
+}</pre>
+            <pre class="code"><span class="tok-c">// App.tsx</span>
+&lt;AppShell
+  header={&lt;TopBar user={me} /&gt;}
+  sidebar={&lt;NavMenu items={links} /&gt;}
+  footer={&lt;StatusBar /&gt;}
+&gt;
+  &lt;Dashboard /&gt;
+&lt;/AppShell&gt;
+
+<span class="tok-c">// ანუ:</span>
+<span class="tok-c">// header   → TopBar</span>
+<span class="tok-c">// sidebar  → NavMenu</span>
+<span class="tok-c">// children → Dashboard</span>
+<span class="tok-c">// footer   → StatusBar</span></pre>
+          </div>
+        </div>
+      </section>
+
+      <!-- SLIDE 12: Protected Route -->
+      <section class="slide absolute inset-0 flex items-center justify-center p-8">
+        <div class="max-w-6xl w-full">
+          <div class="chip inline-block mb-3">10 · Practice</div>
+          <h2 class="text-3xl font-bold mb-6">ყველაფერი ერთად: <span class="glow">Protected Route</span></h2>
+          <div class="grid md:grid-cols-2 gap-6">
+            <pre class="code"><span class="tok-c">// components/ProtectedRoute.tsx</span>
+<span class="tok-k">import</span> { ReactNode } <span class="tok-k">from</span> <span class="tok-s">"react"</span>;
+<span class="tok-k">import</span> { Navigate } <span class="tok-k">from</span> <span class="tok-s">"react-router-dom"</span>;
+
+<span class="tok-k">interface</span> <span class="tok-t">Props</span> {
+  children: <span class="tok-t">ReactNode</span>;
+}
+
+<span class="tok-k">export function</span> <span class="tok-f">ProtectedRoute</span>({ children }: <span class="tok-t">Props</span>) {
+  <span class="tok-k">const</span> token = localStorage.<span class="tok-f">getItem</span>(<span class="tok-s">"token"</span>);
+
+  <span class="tok-k">if</span> (!token) <span class="tok-k">return</span> &lt;Navigate to=<span class="tok-s">"/login"</span> /&gt;;
+  <span class="tok-k">return</span> &lt;&gt;{children}&lt;/&gt;;
+}</pre>
+            <pre class="code"><span class="tok-c">// App.tsx</span>
+&lt;Routes&gt;
+  &lt;Route path=<span class="tok-s">"/login"</span> element={&lt;LoginPage /&gt;} /&gt;
+
+  &lt;Route path=<span class="tok-s">"/"</span> element={
+    &lt;ProtectedRoute&gt;
+      &lt;MainLayout&gt;
+        &lt;Dashboard /&gt;
+      &lt;/MainLayout&gt;
+    &lt;/ProtectedRoute&gt;
+  } /&gt;
+&lt;/Routes&gt;
+
+<span class="tok-c">// Layout + JWT + Children = 💪</span></pre>
+          </div>
+        </div>
+      </section>
+
+      <!-- SLIDE 13: Summary -->
+      <section class="slide absolute inset-0 flex items-center justify-center p-8">
+        <div class="max-w-4xl w-full text-center">
+          <div class="chip inline-block mb-4">შეჯამება</div>
+          <h2 class="text-4xl font-bold mb-8"><span class="glow">რას ვისწავლეთ</span></h2>
+          <div class="grid md:grid-cols-2 gap-4 text-left mb-8">
+            <div class="card p-5"><span class="text-2xl">🔐</span> <b>JWT</b> — stateless ავტორიზაციის სტანდარტი</div>
+            <div class="card p-5"><span class="text-2xl">📘</span> <b>interfaces</b> — Request / Response ტიპები</div>
+            <div class="card p-5"><span class="text-2xl">🌐</span> <b>fetch GET/POST</b> — ტიპიზებული ჰედერებით</div>
+            <div class="card p-5"><span class="text-2xl">📦</span> <b>DTO</b> — სხეულის ტიპიზაცია POST-ში</div>
+            <div class="card p-5"><span class="text-2xl">⚛️</span> <b>Binding</b> — useState + useEffect + map</div>
+            <div class="card p-5"><span class="text-2xl">🧩</span> <b>Layout & Slots</b> — children + სახელდებული props
+            </div>
+          </div>
+          <div class="text-sm opacity-70">გმადლობთ ყურადღებისთვის! 🎉</div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Footer / navigation -->
+    <footer class="flex items-center justify-between px-6 py-3 border-t border-white/10">
+      <button id="prevBtn" class="btn flex items-center gap-2">
+        <span>←</span> <span>წინა</span>
+      </button>
+      <div class="flex gap-1.5" id="dots"></div>
+      <button id="nextBtn" class="btn flex items-center gap-2">
+        <span>შემდეგი</span> <span>→</span>
+      </button>
+    </footer>
+  </div>
+
+  <script>
+    const slides = document.querySelectorAll('.slide');
+    const total = slides.length;
+    let idx = 0;
+
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const counter = document.getElementById('counter');
+    const progress = document.getElementById('progress');
+    const dots = document.getElementById('dots');
+
+    // build dots
+    for (let i = 0; i < total; i++) {
+      const d = document.createElement('button');
+      d.className = 'w-2 h-2 rounded-full bg-white/20 transition-all';
+      d.addEventListener('click', () => goTo(i));
+      dots.appendChild(d);
+    }
+
+    function render() {
+      slides.forEach((s, i) => {
+        s.classList.remove('active', 'prev');
+        if (i === idx) s.classList.add('active');
+        else if (i < idx) s.classList.add('prev');
+      });
+      counter.textContent = `${idx + 1} / ${total}`;
+      progress.style.width = `${((idx + 1) / total) * 100}%`;
+      prevBtn.disabled = idx === 0;
+      nextBtn.disabled = idx === total - 1;
+      [...dots.children].forEach((d, i) => {
+        d.className = 'w-2 h-2 rounded-full transition-all ' +
+          (i === idx ? 'bg-gradient-to-r from-blue-400 to-purple-400 w-6' : 'bg-white/20');
+      });
+    }
+    function goTo(i) { idx = Math.max(0, Math.min(total - 1, i)); render(); }
+    prevBtn.addEventListener('click', () => goTo(idx - 1));
+    nextBtn.addEventListener('click', () => goTo(idx + 1));
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); goTo(idx + 1); }
+      if (e.key === 'ArrowLeft') { e.preventDefault(); goTo(idx - 1); }
+      if (e.key === 'Home') goTo(0);
+      if (e.key === 'End') goTo(total - 1);
+    });
+    render();
+  </script>
+</body>
+
+</html>
