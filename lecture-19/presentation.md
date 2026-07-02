@@ -7,6 +7,8 @@
 - Classes, Interfaces & API Integration
 <img width="1600" height="837" alt="image" src="https://github.com/user-attachments/assets/3f6c5660-ff92-479e-8b96-ee94fadfb8f0" />
 
+---
+
 
 ---
 
@@ -66,14 +68,15 @@ interface IUser {
 class User implements IUser {
   constructor(public id: number, public name: string, 
               private email: string) {}
-  
+
   getEmail(): string {
     return this.email;
   }
 }
 
 // Usage
-const user = new User(1, "გიორგი", "giorgi@example.com");
+const user: IUser = new User(1, "გიორგი", "giorgi@example.com");
+console.log(user.getEmail()); // "giorgi@example.com"
 ```
 
 ---
@@ -84,26 +87,28 @@ const user = new User(1, "გიორგი", "giorgi@example.com");
 // Base Class
 class Animal {
   constructor(public name: string) {}
-  
+
   move(distance: number): void {
     console.log(`${this.name} moved ${distance}m`);
   }
 }
 
-// Derived Class
+// Derived Class — extends
 class Dog extends Animal {
   constructor(public name: string, public breed: string) {
-    super(name);
+    super(name); // მშობელი კლასის constructor-ის გამოძახება
   }
-  
+
   bark(): void {
     console.log(`${this.name} says: Woof!`);
   }
 }
 
+// გამოყენება
 const myDog = new Dog("რექსი", "German Shepherd");
-myDog.move(10);
-myDog.bark();
+myDog.move(10);  // "რექსი moved 10m"
+myDog.bark();    // "რექსი says: Woof!"
+console.log(myDog.breed); // "German Shepherd"
 ```
 
 ---
@@ -142,6 +147,9 @@ class Counter extends Component<Props, State> {
     );
   }
 }
+
+// გამოყენება App-ში:
+// <Counter title="My Counter" />
 ```
 
 ---
@@ -181,6 +189,26 @@ class UserService {
     });
     return await response.json();
   }
+}
+
+// გამოყენება:
+async function main() {
+  const userService = new UserService('https://jsonplaceholder.typicode.com');
+
+  // GET ყველა მომხმარებელი
+  const users = await userService.getUsers();
+  console.log(users); // User[]
+
+  // GET ერთი მომხმარებელი
+  const user = await userService.getUserById(1);
+  console.log(user.name);
+
+  // POST ახალი მომხმარებელი
+  const newUser = await userService.createUser({
+    name: 'ნინო',
+    email: 'nino@example.com'
+  });
+  console.log(newUser.id); // 11 (მოჩვენებითი API)
 }
 ```
 
@@ -224,6 +252,21 @@ class ApiClient {
     return this.handleResponse<T>(response);
   }
 }
+
+// გამოყენება:
+const api = new ApiClient('https://jsonplaceholder.typicode.com', 'my-token-123');
+
+// ტიპიზირებული GET მოთხოვნა
+const posts = await api.get<Post[]>('/posts');
+console.log(posts[0].title);
+
+// POST მოთხოვნა
+const newPost = await api.post<Post>('/posts', {
+  title: 'New Post',
+  body: 'Content here',
+  userId: 1
+});
+console.log(newPost.id);
 ```
 
 ---
@@ -231,6 +274,9 @@ class ApiClient {
 ## **სლაიდი 9: Using API Class in React Component**
 
 ```typescript
+// App.tsx-ში გამოყენება:
+// <UserList />
+
 import React, { Component } from 'react';
 import { ApiClient } from '../services/ApiClient';
 
@@ -340,6 +386,24 @@ class PostService extends BaseApiService<Post> {
     };
   }
 }
+
+// გამოყენება:
+interface Post {
+  id: number;
+  title: string;
+  body: string;
+  userId: number;
+}
+
+const postService = new PostService('https://jsonplaceholder.typicode.com');
+
+// getAll() იყენებს მშობელი BaseApiService-ის ლოგიკას
+const allPosts = await postService.getAll();
+console.log(allPosts[0].title);
+
+// getById() ასევე მშობლიდან + transformData
+const singlePost = await postService.getById(1);
+console.log(singlePost.title);
 ```
 
 ---
@@ -401,9 +465,21 @@ class Repository<T extends { id: number }>
   }
 }
 
-// Usage
-const userRepository = new Repository<User>('https://api.example.com', 'users');
-const postsRepository = new Repository<Post>('https://api.example.com', 'posts');
+// Usage — Generic Repository
+interface User { id: number; name: string; email: string; }
+interface Post { id: number; title: string; body: string; }
+
+const userRepo = new Repository<User>('https://jsonplaceholder.typicode.com', 'users');
+const postRepo = new Repository<Post>('https://jsonplaceholder.typicode.com', 'posts');
+
+// TypeScript ამოწმებს ტიპებს Repository-ს მიხედვით
+const users = await userRepo.getAll();     // User[]
+const user = await userRepo.getById(1);    // User
+const newUser = await userRepo.create({ name: 'თამარ', email: 'tamar@example.com' }); // User
+await userRepo.update(1, { name: 'Updated' }); // Partial<User>
+await userRepo.delete(1); // void
+
+const posts = await postRepo.getAll();     // Post[]
 ```
 
 ---
@@ -466,6 +542,39 @@ class ShoppingCart {
     return this.items.reduce((sum, item) => sum + item.quantity, 0);
   }
 }
+
+### ShoppingCart-ის გამოყენების მაგალითი
+
+```typescript
+// 1. პროდუქტების შექმნა
+const laptop: Product = { id: 1, title: 'MacBook Pro', price: 5999, category: 'electronics', image: 'laptop.jpg', inStock: true };
+const mouse: Product = { id: 2, title: 'Magic Mouse', price: 129, category: 'electronics', image: 'mouse.jpg', inStock: true };
+const ebook: Product = { id: 3, title: 'TypeScript Guide', price: 45, category: 'digital', image: 'ebook.jpg', inStock: true };
+
+// 2. კალათის შექმნა 18% გადასახადით
+const cart = new ShoppingCart(0.18);
+
+// 3. პროდუქტების დამატება
+cart.addItem(laptop, 1);
+cart.addItem(mouse, 2);
+
+// 4. იგივე პროდუქტის დამატება — quantity გაიზრდება
+cart.addItem(mouse, 1); // mouse quantity ახლა = 3
+
+// 5. გამოთვლები
+console.log(cart.getSubtotal());    // 5999*1 + 129*3 = 6386
+console.log(cart.getTotal());       // 6386 * 1.18 = 7535.48
+console.log(cart.getItemCount());   // 1 + 3 = 4
+
+// 6. პროდუქტის წაშლა
+cart.removeItem(2);  // mouse წაიშლება
+
+// 7. ციფრული პროდუქტის დამატება
+cart.addItem(ebook, 2);
+
+console.log(cart.getItemCount());   // 1 (laptop) + 2 (ebook) = 3
+console.log(cart.getSubtotal());    // 5999 + 45*2 = 6089
+console.log(cart.getTotal());       // 6089 * 1.18 = 7185.02
 ```
 
 ---
@@ -589,26 +698,32 @@ interface Post {
 // Class Component
 class Welcome extends Component<Props, State> {
   state = { count: 0 };
-  
+
   componentDidMount() {
-    // side effects
+    // side effects — იტვირთება მხოლოდ ერთხელ
   }
-  
+
   render() {
     return <div>{this.state.count}</div>;
   }
 }
 
+// გამოყენება:
+// <Welcome title="Hello" />
+
 // Functional Component (Modern React)
 const Welcome: React.FC<Props> = (props) => {
   const [count, setCount] = useState(0);
-  
+
   useEffect(() => {
     // side effects
   }, []);
-  
+
   return <div>{count}</div>;
 };
+
+// გამოყენება:
+// <Welcome title="Hello" />
 ```
 
 **როდის გამოვიყენოთ Class?**
