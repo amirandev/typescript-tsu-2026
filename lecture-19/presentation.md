@@ -3,7 +3,7 @@
 
 ---
 
-## **სლაიდი 1: Title Slide**
+## **სლაიდი 1**
 ### **OOP in TypeScript & React**
 - Classes, Interfaces & API Integration
 <img width="1600" height="837" alt="image" src="https://github.com/user-attachments/assets/3f6c5660-ff92-479e-8b96-ee94fadfb8f0" />
