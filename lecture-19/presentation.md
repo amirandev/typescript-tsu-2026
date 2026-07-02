@@ -1,707 +1,638 @@
-# ლექცია 19 — Classes & OOP in TypeScript (რეალური მაგალითები)
+# პრეზენტაცია: OOP in TypeScript & React
+## სლაიდების სტრუქტურა (15-20 სლაიდი)
 
-## 1. კლასების საფუძვლები (Classes Basics)
+---
+
+## **სლაიდი 1: Title Slide**
+### **OOP in TypeScript & React**
+- Classes, Interfaces & API Integration
+- [თქვენი სახელი/თარიღი]
+
+---
+
+## **სლაიდი 2: რა არის OOP?**
+### **Object-Oriented Programming Principles**
+
+**4 ძირითადი პრინციპი:**
+1. **Encapsulation** - მონაცემთა დაფარვა
+2. **Inheritance** - მემკვიდრეობა
+3. **Polymorphism** - პოლიმორფიზმი
+4. **Abstraction** - აბსტრაქცია
+
+**ილუსტრაცია:** OOP-ს 4 სვეტი დიაგრამა
+
+---
+
+## **სლაიდი 3: TypeScript-ის OOP შესაძლებლობები**
 
 ```typescript
-class Product {
-  id: number;
-  title: string;
-  price: number;
+// კლასის შექმნა
+class User {
+  private id: number;
+  public name: string;
+  protected email: string;
 
-  constructor(id: number, title: string, price: number) {
+  constructor(id: number, name: string, email: string) {
     this.id = id;
-    this.title = title;
-    this.price = price;
-  }
-
-  formattedPrice(): string {
-    return `₾${this.price.toFixed(2)}`;
-  }
-}
-
-const phone = new Product(1, 'iPhone 15', 1499);
-console.log(phone.formattedPrice()); // ₾1499.00
-```
-
-**რეალური გამოყენება**: ეკომერსის პროდუქტის მოდელი — თითოეული პროდუქტი არის `Product` კლასის ინსტანცია, რომელსაც აქვს საკუთარი id, title, price.
-
----
-
-## 2. Access Modifiers (წვდომის მოდიფიკატორები)
-
-| Modifier | კლასში | შთამომავალში | გარედან |
-|----------|--------|---------------|---------|
-| `public` (default) | ✓ | ✓ | ✓ |
-| `private` | ✓ | ✗ | ✗ |
-| `protected` | ✓ | ✓ | ✗ |
-
-```typescript
-class Payment {
-  public id: string;
-  public amount: number;
-  private status: string = 'pending';     // მხოლოდ კლასის შიგნით
-  protected transactionId: string = '';    // მხოლოდ კლასი + შთამომავლები
-
-  constructor(id: string, amount: number) {
-    this.id = id;
-    this.amount = amount;
-  }
-
-  public complete(): void {
-    this.status = 'completed';
-    this.transactionId = `txn_${Date.now()}`;
-    this.sendReceipt();
-  }
-
-  private sendReceipt(): void {
-    console.log(`Receipt sent for ${this.id}`);
-  }
-}
-
-class Refund extends Payment {
-  constructor(id: string, amount: number) {
-    super(id, amount);
-  }
-
-  processRefund(): void {
-    // this.status — ❌ private (მიუწვდომელია)
-    this.transactionId = `ref_${Date.now()}`; // ✓ protected
-    console.log(`Refunding ${this.amount}`);
-  }
-}
-
-const payment = new Payment('pay_123', 250);
-payment.complete();            // ✓ public
-// payment.status — ❌ private
-// payment.transactionId — ❌ protected
-// payment.sendReceipt() — ❌ private
-```
-
-**რეალური გამოყენება**: გადახდების სისტემა — `status` private-ია, რომ გარედან პირდაპირ ვერ შეცვალონ; `transactionId` protected-ია, რომ Refund კლასმა შეძლოს წვდომა.
-
----
-
-## 3. მემკვიდრეობა (Inheritance) — `extends`
-
-```typescript
-class Order {
-  constructor(
-    public id: number,
-    public items: string[],
-    public total: number,
-    public createdAt: Date = new Date()
-  ) {}
-
-  summary(): string {
-    return `Order #${this.id}: ${this.items.length} items, ₾${this.total}`;
-  }
-}
-
-class DiscountedOrder extends Order {
-  constructor(
-    id: number,
-    items: string[],
-    total: number,
-    public discountPercent: number
-  ) {
-    super(id, items, total); // მშობელი კლასის constructor
-  }
-
-  get discountedTotal(): number {
-    return this.total * (1 - this.discountPercent / 100);
-  }
-
-  // override — მშობელი მეთოდის გადაწერა
-  summary(): string {
-    return `${super.summary()} (${this.discountPercent}% off → ₾${this.discountedTotal})`;
-  }
-}
-
-const order = new DiscountedOrder(1, ['Laptop', 'Mouse'], 2000, 10);
-console.log(order.summary());
-// Order #1: 2 items, ₾2000 (10% off → ₾1800)
-```
-
-**რეალური გამოყენება**: ეკომერსის შეკვეთები — `Order` ბაზური კლასი, `DiscountedOrder` ფართოებს ფასდაკლების ლოგიკით.
-
----
-
-## 4. Parameter Properties (შემოკლებული სინტაქსი)
-
-```typescript
-// გრძელი ვერსია
-class UserLong {
-  private name: string;
-  private email: string;
-  constructor(name: string, email: string) {
     this.name = name;
     this.email = email;
   }
+
+  public getInfo(): string {
+    return `${this.name} (${this.email})`;
+  }
+}
+```
+
+**TypeScript features:**
+- Access modifiers (public/private/protected)
+- Interfaces
+- Abstract classes
+- Generics
+
+---
+
+## **სლაიდი 4: Classes vs Interfaces**
+
+```typescript
+// Interface
+interface IUser {
+  id: number;
+  name: string;
+  getEmail(): string;
 }
 
-// მოკლე ვერსია (Parameter Properties)
-class User {
-  constructor(
-    public id: number,
-    public name: string,
-    public email: string,
-    private passwordHash: string
-  ) {}
+// Class implementing Interface
+class User implements IUser {
+  constructor(public id: number, public name: string, 
+              private email: string) {}
+  
+  getEmail(): string {
+    return this.email;
+  }
 }
-// id, name, email, passwordHash თვისებები ავტომატურად შეიქმნა
+
+// Usage
+const user = new User(1, "გიორგი", "giorgi@example.com");
 ```
 
 ---
 
-## 5. Readonly Properties
+## **სლაიდი 5: Inheritance (მემკვიდრეობა)**
 
 ```typescript
-class Invoice {
-  readonly invoiceNumber: string;
-  readonly issuedAt: Date = new Date();
-
-  constructor(
-    public readonly customerId: number,
-    public readonly amount: number
-  ) {
-    this.invoiceNumber = `INV-${Date.now()}`;
+// Base Class
+class Animal {
+  constructor(public name: string) {}
+  
+  move(distance: number): void {
+    console.log(`${this.name} moved ${distance}m`);
   }
 }
 
-const invoice = new Invoice(42, 1500);
-// invoice.invoiceNumber = '...' — ❌ Cannot assign to readonly
-// invoice.customerId = 43 — ❌ Cannot assign to readonly
-```
+// Derived Class
+class Dog extends Animal {
+  constructor(public name: string, public breed: string) {
+    super(name);
+  }
+  
+  bark(): void {
+    console.log(`${this.name} says: Woof!`);
+  }
+}
 
-**რეალური გამოყენება**: ინვოისის ნომერი, თარიღი — მონაცემები, რომლებიც შექმნის შემდეგ არ უნდა შეიცვალოს.
+const myDog = new Dog("რექსი", "German Shepherd");
+myDog.move(10);
+myDog.bark();
+```
 
 ---
 
-## 6. Getters & Setters
+## **სლაიდი 6: OOP in React - Class Components**
 
 ```typescript
-class Cart {
-  private _items: { productId: number; quantity: number; price: number }[] = [];
+import React, { Component } from 'react';
 
-  get items(): readonly { productId: number; quantity: number; price: number }[] {
-    return this._items; // გარედან მხოლოდ წაკითხვა
+interface Props {
+  title: string;
+}
+
+interface State {
+  count: number;
+}
+
+class Counter extends Component<Props, State> {
+  state: State = {
+    count: 0
+  };
+
+  increment = (): void => {
+    this.setState({ count: this.state.count + 1 });
+  };
+
+  render() {
+    return (
+      <div>
+        <h1>{this.props.title}</h1>
+        <p>Count: {this.state.count}</p>
+        <button onClick={this.increment}>
+          Increment
+        </button>
+      </div>
+    );
+  }
+}
+```
+
+---
+
+## **სლაიდი 7: API Service Class - Basic Example**
+
+```typescript
+// api/UserService.ts
+interface User {
+  id: number;
+  name: string;
+  email: string;
+}
+
+class UserService {
+  private baseUrl: string;
+
+  constructor(baseUrl: string = '/api') {
+    this.baseUrl = baseUrl;
   }
 
-  get total(): number {
-    return this._items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  async getUsers(): Promise<User[]> {
+    const response = await fetch(`${this.baseUrl}/users`);
+    return await response.json();
   }
 
-  get itemCount(): number {
-    return this._items.reduce((sum, item) => sum + item.quantity, 0);
+  async getUserById(id: number): Promise<User> {
+    const response = await fetch(`${this.baseUrl}/users/${id}`);
+    return await response.json();
   }
 
-  addItem(productId: number, price: number, quantity: number = 1): void {
-    const existing = this._items.find(i => i.productId === productId);
-    if (existing) {
-      existing.quantity += quantity;
+  async createUser(userData: Omit<User, 'id'>): Promise<User> {
+    const response = await fetch(`${this.baseUrl}/users`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(userData)
+    });
+    return await response.json();
+  }
+}
+```
+
+---
+
+## **სლაიდი 8: Advanced API Class with Error Handling**
+
+```typescript
+class ApiClient {
+  private baseURL: string;
+  private headers: HeadersInit;
+
+  constructor(baseURL: string, token?: string) {
+    this.baseURL = baseURL;
+    this.headers = {
+      'Content-Type': 'application/json',
+      ...(token && { 'Authorization': `Bearer ${token}` })
+    };
+  }
+
+  private async handleResponse<T>(response: Response): Promise<T> {
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    return await response.json();
+  }
+
+  async get<T>(endpoint: string): Promise<T> {
+    const response = await fetch(`${this.baseURL}${endpoint}`, {
+      headers: this.headers
+    });
+    return this.handleResponse<T>(response);
+  }
+
+  async post<T>(endpoint: string, data: unknown): Promise<T> {
+    const response = await fetch(`${this.baseURL}${endpoint}`, {
+      method: 'POST',
+      headers: this.headers,
+      body: JSON.stringify(data)
+    });
+    return this.handleResponse<T>(response);
+  }
+}
+```
+
+---
+
+## **სლაიდი 9: Using API Class in React Component**
+
+```typescript
+import React, { Component } from 'react';
+import { ApiClient } from '../services/ApiClient';
+
+interface User {
+  id: number;
+  name: string;
+  email: string;
+}
+
+interface Props {}
+
+interface State {
+  users: User[];
+  loading: boolean;
+  error: string | null;
+}
+
+class UserList extends Component<Props, State> {
+  private apiClient: ApiClient;
+
+  constructor(props: Props) {
+    super(props);
+    this.apiClient = new ApiClient('https://jsonplaceholder.typicode.com');
+    this.state = {
+      users: [],
+      loading: false,
+      error: null
+    };
+  }
+
+  async componentDidMount(): Promise<void> {
+    this.setState({ loading: true });
+    try {
+      const users = await this.apiClient.get<User[]>('/users');
+      this.setState({ users, loading: false });
+    } catch (error) {
+      this.setState({ 
+        error: 'Failed to fetch users', 
+        loading: false 
+      });
+    }
+  }
+
+  render() {
+    const { users, loading, error } = this.state;
+    
+    if (loading) return <div>Loading...</div>;
+    if (error) return <div>{error}</div>;
+
+    return (
+      <ul>
+        {users.map(user => (
+          <li key={user.id}>
+            {user.name} ({user.email})
+          </li>
+        ))}
+      </ul>
+    );
+  }
+}
+```
+
+---
+
+## **სლაიდი 10: Abstract Class for API Services**
+
+```typescript
+// Abstract base class
+abstract class BaseApiService<T> {
+  protected baseUrl: string;
+  protected resourceName: string;
+
+  constructor(baseUrl: string, resourceName: string) {
+    this.baseUrl = baseUrl;
+    this.resourceName = resourceName;
+  }
+
+  abstract transformData(data: any): T;
+
+  async getAll(): Promise<T[]> {
+    const response = await fetch(`${this.baseUrl}/${this.resourceName}`);
+    const data = await response.json();
+    return data.map((item: any) => this.transformData(item));
+  }
+
+  async getById(id: number): Promise<T> {
+    const response = await fetch(
+      `${this.baseUrl}/${this.resourceName}/${id}`
+    );
+    const data = await response.json();
+    return this.transformData(data);
+  }
+}
+
+// Concrete implementation
+class PostService extends BaseApiService<Post> {
+  constructor(baseUrl: string) {
+    super(baseUrl, 'posts');
+  }
+
+  transformData(data: any): Post {
+    return {
+      id: data.id,
+      title: data.title,
+      body: data.body,
+      userId: data.userId
+    };
+  }
+}
+```
+
+---
+
+## **სლაიდი 11: Generic Repository Pattern**
+
+```typescript
+interface IRepository<T> {
+  getAll(): Promise<T[]>;
+  getById(id: number): Promise<T>;
+  create(item: Omit<T, 'id'>): Promise<T>;
+  update(id: number, item: Partial<T>): Promise<T>;
+  delete(id: number): Promise<void>;
+}
+
+class Repository<T extends { id: number }> 
+  implements IRepository<T> {
+  
+  private baseUrl: string;
+  private endpoint: string;
+
+  constructor(baseUrl: string, endpoint: string) {
+    this.baseUrl = baseUrl;
+    this.endpoint = endpoint;
+  }
+
+  async getAll(): Promise<T[]> {
+    const res = await fetch(`${this.baseUrl}/${this.endpoint}`);
+    return await res.json();
+  }
+
+  async getById(id: number): Promise<T> {
+    const res = await fetch(`${this.baseUrl}/${this.endpoint}/${id}`);
+    return await res.json();
+  }
+
+  async create(item: Omit<T, 'id'>): Promise<T> {
+    const res = await fetch(`${this.baseUrl}/${this.endpoint}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(item)
+    });
+    return await res.json();
+  }
+
+  async update(id: number, item: Partial<T>): Promise<T> {
+    const res = await fetch(`${this.baseUrl}/${this.endpoint}/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(item)
+    });
+    return await res.json();
+  }
+
+  async delete(id: number): Promise<void> {
+    await fetch(`${this.baseUrl}/${this.endpoint}/${id}`, {
+      method: 'DELETE'
+    });
+  }
+}
+
+// Usage
+const userRepository = new Repository<User>('https://api.example.com', 'users');
+const postsRepository = new Repository<Post>('https://api.example.com', 'posts');
+```
+
+---
+
+## **სლაიდი 12: Real-World Example - E-Commerce**
+
+```typescript
+// Models
+interface Product {
+  id: number;
+  name: string;
+  price: number;
+  description: string;
+  inStock: boolean;
+}
+
+interface CartItem {
+  product: Product;
+  quantity: number;
+}
+
+class ShoppingCart {
+  private items: CartItem[] = [];
+  private taxRate: number;
+
+  constructor(taxRate: number = 0.18) {
+    this.taxRate = taxRate;
+  }
+
+  addItem(product: Product, quantity: number = 1): void {
+    const existingItem = this.items.find(
+      item => item.product.id === product.id
+    );
+
+    if (existingItem) {
+      existingItem.quantity += quantity;
     } else {
-      this._items.push({ productId, quantity, price });
+      this.items.push({ product, quantity });
     }
   }
 
   removeItem(productId: number): void {
-    this._items = this._items.filter(i => i.productId !== productId);
-  }
-}
-
-const cart = new Cart();
-cart.addItem(1, 1499);
-cart.addItem(2, 99, 2);
-console.log(cart.total);     // 1697 — getter ითვლის ავტომატურად
-console.log(cart.itemCount); // 3
-// cart.items.push(...) — ❌ readonly მასივი
-```
-
-**რეალური გამოყენება**: კალათის მოდელი — `total` გამოითვლება დინამიურად, `items` გარედან მხოლოდ იკითხება.
-
----
-
-## 7. Static Members
-
-```typescript
-class StripeAPI {
-  private static apiKey: string = '';
-  private static baseUrl = 'https://api.stripe.com/v1';
-
-  static configure(key: string): void {
-    StripeAPI.apiKey = key;
-  }
-
-  private static headers(): Record<string, string> {
-    return {
-      Authorization: `Bearer ${StripeAPI.apiKey}`,
-      'Content-Type': 'application/x-www-form-urlencoded',
-    };
-  }
-
-  static async createPaymentIntent(amount: number, currency: string = 'usd') {
-    const res = await fetch(`${StripeAPI.baseUrl}/payment_intents`, {
-      method: 'POST',
-      headers: StripeAPI.headers(),
-      body: new URLSearchParams({ amount: String(amount), currency }),
-    });
-    return res.json();
-  }
-
-  static async getPayment(intentId: string) {
-    const res = await fetch(`${StripeAPI.baseUrl}/payment_intents/${intentId}`, {
-      headers: StripeAPI.headers(),
-    });
-    return res.json();
-  }
-}
-
-// გამოყენება — ინსტანციის შექმნის გარეშე
-StripeAPI.configure('sk_test_...');
-const intent = await StripeAPI.createPaymentIntent(2000, 'gel');
-```
-
-**რეალური გამოყენება**: SDK wrapper — Stripe, PayPal, ან ნებისმიერი API-ს კლიენტი, სადაც ერთი კონფიგურაცია გლობალურად მოქმედებს.
-
----
-
-## 8. `implements` — ინტერფეისის კონტრაქტი
-
-```typescript
-interface PaymentGateway {
-  charge(amount: number, currency: string): Promise<{ id: string; status: string }>;
-  refund(transactionId: string): Promise<boolean>;
-}
-
-interface WebhookHandler {
-  handleWebhook(payload: unknown): Promise<void>;
-}
-
-// implements — ამოწმებს, რომ კლასი აკმაყოფილებს ინტერფეისს
-class StripeGateway implements PaymentGateway, WebhookHandler {
-  async charge(amount: number, currency: string) {
-    const res = await fetch('https://api.stripe.com/v1/charges', {
-      method: 'POST',
-      headers: { Authorization: 'Bearer sk_test_...' },
-      body: new URLSearchParams({ amount: String(amount), currency }),
-    });
-    return res.json();
-  }
-
-  async refund(transactionId: string) {
-    const res = await fetch(`https://api.stripe.com/v1/charges/${transactionId}/refund`, {
-      method: 'POST',
-    });
-    return res.ok;
-  }
-
-  async handleWebhook(payload: unknown) {
-    console.log('Processing Stripe webhook...');
-  }
-}
-
-class PayPalGateway implements PaymentGateway {
-  async charge(amount: number, currency: string) {
-    // PayPal-ის სპეციფიკური იმპლემენტაცია
-    return { id: 'PAY-123', status: 'completed' };
-  }
-
-  async refund(transactionId: string) {
-    return true;
-  }
-}
-
-// ერთი ინტერფეისი — ორი სხვადასხვა იმპლემენტაცია
-function processPayment(gateway: PaymentGateway, amount: number) {
-  return gateway.charge(amount, 'usd');
-}
-```
-
-**რეალური გამოყენება**: Payment Gateway Strategy — ერთი ინტერფეისი, მრავალი პროვაიდერი (Stripe, PayPal, TBC Pay). ადვილი გადართვა პროვაიდერებს შორის.
-
----
-
-## 9. Abstract Classes (აბსტრაქტული კლასები)
-
-```typescript
-abstract class APIClient {
-  constructor(protected baseUrl: string, protected apiKey: string) {}
-
-  // აბსტრაქტული — თითოეულმა შთამომავალმა უნდა განსაზღვროს
-  abstract parseError(response: Response): Error;
-
-  // საერთო ლოგიკა ყველასთვის
-  protected async request<T>(
-    method: string,
-    path: string,
-    body?: unknown
-  ): Promise<T> {
-    const res = await fetch(`${this.baseUrl}${path}`, {
-      method,
-      headers: {
-        Authorization: `Bearer ${this.apiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: body ? JSON.stringify(body) : undefined,
-    });
-
-    if (!res.ok) {
-      throw this.parseError(res); // აბსტრაქტული მეთოდის გამოძახება
-    }
-
-    return res.json();
-  }
-}
-
-class StripeClient extends APIClient {
-  constructor(apiKey: string) {
-    super('https://api.stripe.com/v1', apiKey);
-  }
-
-  parseError(res: Response): Error {
-    return new Error(`Stripe error: ${res.status}`);
-  }
-
-  async createPayment(amount: number) {
-    return this.request<{ id: string }>('POST', '/payment_intents', { amount });
-  }
-}
-
-class TBCCPayClient extends APIClient {
-  constructor(apiKey: string) {
-    super('https://api.tbcbank.ge/v1', apiKey);
-  }
-
-  parseError(res: Response): Error {
-    return new Error(`TBC error: ${res.status} - ${res.statusText}`);
-  }
-
-  async transfer(account: string, amount: number) {
-    return this.request<{ transactionId: string }>('POST', '/transfer', { account, amount });
-  }
-}
-```
-
-**რეალური გამოყენება**: API Client SDK — `APIClient` აბსტრაქტული კლასი შეიცავს საერთო `request` ლოგიკას, ხოლო `StripeClient`/`TBCCPayClient` ახდენს მის კონკრეტიზაციას.
-
----
-
-## 10. Generics კლასებთან
-
-```typescript
-class PaginatedResponse<T> {
-  constructor(
-    public data: T[],
-    public currentPage: number,
-    public lastPage: number,
-    public perPage: number,
-    public total: number
-  ) {}
-
-  get hasNext(): boolean {
-    return this.currentPage < this.lastPage;
-  }
-
-  get hasPrev(): boolean {
-    return this.currentPage > 1;
-  }
-
-  get totalPages(): number {
-    return this.lastPage;
-  }
-
-  map<U>(fn: (item: T) => U): PaginatedResponse<U> {
-    return new PaginatedResponse(
-      this.data.map(fn),
-      this.currentPage,
-      this.lastPage,
-      this.perPage,
-      this.total
+    this.items = this.items.filter(
+      item => item.product.id !== productId
     );
   }
-}
 
-interface Product {
-  id: number;
-  title: string;
-  price: number;
-}
-
-// TypeScript ავტომატურად გამოიცნობს PaginatedResponse<Product>
-const response = await fetch('/api/products?page=1');
-const json = await response.json();
-const page = new PaginatedResponse<Product>(
-  json.data,
-  json.current_page,
-  json.last_page,
-  json.per_page,
-  json.total
-);
-
-page.data.forEach(product => console.log(product.title));
-```
-
-**რეალური გამოყენება**: API-დან მომავალი პაგინირებული მონაცემის ტიპიზირება — `PaginatedResponse<Product>`, `PaginatedResponse<Order>`.
-
----
-
-## 11. Class vs Interface
-
-```typescript
-// Interface — მხოლოდ ტიპი (არ არსებობს runtime-ში)
-interface IProduct {
-  id: number;
-  title: string;
-  price: number;
-  formattedPrice(): string;
-}
-
-// Class — ტიპიც + მნიშვნელობაც (არსებობს runtime-ში)
-class Product implements IProduct {
-  constructor(
-    public id: number,
-    public title: string,
-    public price: number
-  ) {}
-
-  formattedPrice(): string {
-    return `₾${this.price.toFixed(2)}`;
-  }
-}
-```
-
-| | Interface | Class |
-|---|-----------|-------|
-| Runtime | წაიშლება | არსებობს |
-| `new` | არ შეიძლება | შეიძლება |
-| Default values | არ შეიძლება | შეიძლება |
-| Methods | მხოლოდ signature | იმპლემენტაციით |
-| Access modifiers | არ აქვს | `private`, `protected` |
-| Inheritance | `extends` (მრავლობითი) | `extends` (ერთი) + `implements` |
-
----
-
-## 12. TypeScript Class vs JavaScript Class
-
-```typescript
-// TypeScript
-class Payment {
-  constructor(
-    private amount: number,    // TypeScript — JS-ში წაიშლება
-    readonly currency: string  // TypeScript — JS-ში წაიშლება
-  ) {}
-
-  process(): string {
-    return `Processing ${this.amount} ${this.currency}`;
-  }
-}
-
-// JavaScript-ად ტრანსპილაციის შემდეგ
-// class Payment {
-//   constructor(amount, currency) {
-//     this.amount = amount;    // private? — აღარ!
-//     this.currency = currency;
-//   }
-//   process() { return `Processing ${this.amount} ${this.currency}`; }
-// }
-```
-
-**რას კარგავს TypeScript კლასი JavaScript-ში?**
-- `private`, `protected`, `readonly` — წაიშლება (JS-ში # private fields არის, მაგრამ TypeScript-ის `private`-ის ნაცვლად)
-- ტიპები — წაიშლება
-- `implements` — მხოლოდ compile-time შემოწმება
-
----
-
-## 13. This Type & Method Chaining
-
-```typescript
-class ProductQuery {
-  constructor(
-    private products: Product[],
-    private filters: ((p: Product) => boolean)[] = []
-  ) {}
-
-  whereCategory(category: string): this {
-    this.filters.push(p => p.category === category);
-    return this;
+  getSubtotal(): number {
+    return this.items.reduce(
+      (sum, item) => sum + (item.product.price * item.quantity), 
+      0
+    );
   }
 
-  wherePrice(min: number, max: number): this {
-    this.filters.push(p => p.price >= min && p.price <= max);
-    return this;
+  getTotal(): number {
+    return this.getSubtotal() * (1 + this.taxRate);
   }
 
-  whereInStock(): this {
-    this.filters.push(p => p.stock > 0);
-    return this;
-  }
-
-  execute(): Product[] {
-    return this.products.filter(p => this.filters.every(f => f(p)));
-  }
-}
-
-const products: Product[] = [
-  { id: 1, title: 'Laptop', price: 3000, category: 'electronics', stock: 5 },
-  { id: 2, title: 'Phone', price: 1500, category: 'electronics', stock: 0 },
-  { id: 3, title: 'Shirt', price: 50, category: 'clothing', stock: 20 },
-];
-
-// Method Chaining
-const result = new ProductQuery(products)
-  .whereCategory('electronics')
-  .wherePrice(1000, 5000)
-  .whereInStock()
-  .execute();
-
-console.log(result); // [{ id: 1, title: 'Laptop', ... }]
-```
-
-**რეალური გამოყენება**: Query Builder — პროდუქტების ფილტრაცია კატეგორიის, ფასის და სხვა პარამეტრების მიხედვით.
-
----
-
-## 14. Singleton Pattern
-
-```typescript
-class PaymentConfig {
-  private static instance: PaymentConfig | null = null;
-
-  public stripeKey: string = '';
-  public tbcMerchantId: string = '';
-
-  private constructor() {} // გარედან new-ის აკრძალვა
-
-  static getInstance(): PaymentConfig {
-    if (!PaymentConfig.instance) {
-      PaymentConfig.instance = new PaymentConfig();
-    }
-    return PaymentConfig.instance;
-  }
-
-  loadFromEnv(): void {
-    this.stripeKey = process.env.STRIPE_KEY ?? '';
-    this.tbcMerchantId = process.env.TBC_MERCHANT_ID ?? '';
-  }
-}
-
-// ყველგან ერთი და იგივე ინსტანცია
-const config1 = PaymentConfig.getInstance();
-const config2 = PaymentConfig.getInstance();
-console.log(config1 === config2); // true
-```
-
----
-
-## 15. შემაჯამებელი მაგალითი — E-commerce Order System
-
-```typescript
-interface Discountable {
-  applyDiscount(percent: number): void;
-}
-
-interface Shippable {
-  weight: number;
-  shippingCost(): number;
-}
-
-abstract class CartItem {
-  constructor(
-    public productId: number,
-    public title: string,
-    protected price: number,
-    public quantity: number
-  ) {}
-
-  abstract get totalPrice(): number;
-
-  formattedPrice(): string {
-    return `₾${this.totalPrice.toFixed(2)}`;
-  }
-}
-
-class PhysicalItem extends CartItem implements Shippable {
-  constructor(
-    productId: number,
-    title: string,
-    price: number,
-    quantity: number,
-    public weight: number
-  ) {
-    super(productId, title, price, quantity);
-  }
-
-  get totalPrice(): number {
-    return this.price * this.quantity + this.shippingCost();
-  }
-
-  shippingCost(): number {
-    return this.weight * 5; // ₾5 per kg
-  }
-}
-
-class DigitalItem extends CartItem {
-  constructor(
-    productId: number,
-    title: string,
-    price: number,
-    quantity: number,
-    public downloadUrl: string
-  ) {
-    super(productId, title, price, quantity);
-  }
-
-  get totalPrice(): number {
-    return this.price * this.quantity; // ციფრულ პროდუქტს მიტანა არ სჭირდება
-  }
-}
-
-class Order {
-  private items: CartItem[] = [];
-
-  constructor(
-    public readonly orderId: string,
-    public readonly customerEmail: string
-  ) {}
-
-  addItem(item: CartItem): void {
-    this.items.push(item);
-  }
-
-  get subtotal(): number {
-    return this.items.reduce((sum, item) => sum + item.totalPrice, 0);
-  }
-
-  get totalItems(): number {
+  getItemCount(): number {
     return this.items.reduce((sum, item) => sum + item.quantity, 0);
   }
-
-  checkout(): string {
-    const summary = this.items
-      .map(i => `  ${i.title} x${i.quantity} — ${i.formattedPrice()}`)
-      .join('\n');
-    return `Order #${this.orderId}\n${summary}\nTotal: ₾${this.subtotal.toFixed(2)}`;
-  }
 }
-
-// გამოყენება
-const order = new Order('ORD-001', 'customer@example.com');
-order.addItem(new PhysicalItem(1, 'Laptop', 3000, 1, 2.5));   // ₾3000 + ₾12.5 shipping
-order.addItem(new DigitalItem(2, 'E-book', 25, 2, 'https://...')); // ₾50
-
-console.log(order.checkout());
-// Order #ORD-001
-//   Laptop x1 — ₾3012.50
-//   E-book x2 — ₾50.00
-// Total: ₾3062.50
 ```
 
 ---
 
-## Practice (ეკომერსის ამოცანები)
+## **სლაიდი 13: Classwork - Exercise 1**
 
-1. **Product კლასი** — `id`, `title`, `price`, `stock` თვისებებით. მეთოდები: `isAvailable()`, `reduceStock(quantity)`
-2. **ShoppingCart** — `addItem`, `removeItem`, `clear`, `total` (getter), `items` (readonly)
-3. **PaymentGateway** — ინტერფეისი `charge()` მეთოდით. `StripePayment` და `TBCPayment` კლასები
-4. **OrderStatus** — `pending | confirmed | shipped | delivered | cancelled`. `Order` კლასი, რომელიც სტატუსს მართავს private ველით
+### **ავტომობილების მართვის სისტემა**
+
+**დავალება:**
+შექმენით კლასები მანქანებისთვის:
+
+```typescript
+// შექმენით:
+1. აბსტრაქტული კლასი Vehicle
+   - properties: brand, model, year, speed
+   - methods: start(), stop(), accelerate()
+
+2. კლასი Car extends Vehicle
+   - დამატებითი property: numberOfDoors
+   - override method: accelerate()
+
+3. კლასი Motorcycle extends Vehicle
+   - დამატებითი property: hasSidecar
+   - override method: accelerate()
+
+4. შექმენით 2 Car და 1 Motorcycle ინსტანცი
+5. გამოიყენეთ ყველა მეთოდი
+```
+
+---
+
+## **სლაიდი 14: Classwork - Exercise 2**
+
+### **API Service for Blog Posts**
+
+**დავალება:**
+შექმენით API სერვისი ბლოგ პოსტებისთვის:
+
+```typescript
+interface Post {
+  id: number;
+  title: string;
+  content: string;
+  author: string;
+  createdAt: Date;
+  published: boolean;
+}
+
+// შექმენით:
+1. კლასი PostService
+   - მეთოდები:
+     * getAllPosts(): Promise<Post[]>
+     * getPublishedPosts(): Promise<Post[]>
+     * getPostById(id: number): Promise<Post>
+     * createPost(post: Omit<Post, 'id'>): Promise<Post>
+     * updatePost(id: number, updates: Partial<Post>): Promise<Post>
+     * deletePost(id: number): Promise<void>
+     * searchPosts(query: string): Promise<Post[]>
+
+2. დაამატეთ error handling
+3. გამოიყენეთ fetch ან axios
+4. test API: https://jsonplaceholder.typicode.com/posts
+```
+
+---
+
+## **სლაიდი 15: Classwork - Exercise 3**
+
+### **React Class Component with API**
+
+**დავალება:**
+შექმენით React კომპონენტი:
+
+```typescript
+// შექმენით:
+1. TypeScript interface-ები:
+   - Product { id, name, price, image, category }
+   - Props {}
+   - State { products, filteredProducts, loading, error, searchQuery }
+
+2. Class Component ProductCatalog
+   - გამოიყენეთ ApiClient კლასი
+   - componentDidMount - ჩატვირთოს პროდუქტები
+   - search functionality
+   - filter by category
+   - add to cart functionality
+   - loading და error states
+
+3. დამატებითი features:
+   - pagination
+   - sort by price/name
+   - favorite products (localStorage)
+```
+
+---
+
+## **სლაიდი 16: Best Practices**
+
+### **OOP Best Practices in TypeScript/React**
+
+✅ **Do's:**
+- Use interfaces for type safety
+- Implement dependency injection
+- Follow Single Responsibility Principle
+- Use composition over inheritance
+- Make properties private/protected when needed
+- Use abstract classes for shared functionality
+
+❌ **Don'ts:**
+- Avoid deep inheritance chains
+- Don't expose mutable state directly
+- Avoid god classes (too many responsibilities)
+- Don't ignore error handling
+- Avoid tight coupling between classes
+
+---
+
+## **სლაიდი 17: Class vs Functional Components**
+
+```typescript
+// Class Component
+class Welcome extends Component<Props, State> {
+  state = { count: 0 };
+  
+  componentDidMount() {
+    // side effects
+  }
+  
+  render() {
+    return <div>{this.state.count}</div>;
+  }
+}
+
+// Functional Component (Modern React)
+const Welcome: React.FC<Props> = (props) => {
+  const [count, setCount] = useState(0);
+  
+  useEffect(() => {
+    // side effects
+  }, []);
+  
+  return <div>{count}</div>;
+};
+```
+
+**როდის გამოვიყენოთ Class?**
+- Legacy code
+- Error boundaries
+- When you need lifecycle methods
+- Learning OOP concepts
+
+---
+
+## **სლაიდი 18: Resources & Next Steps**
+
+**სასარგებლო რესურსები:**
+
+📚 **Documentation:**
+- TypeScript Handbook: https://www.typescriptlang.org/docs/
+- React Docs: https://react.dev/
+
+🎓 **Practice:**
+- LeetCode - OOP problems
+- Build a full CRUD app
+- Contribute to open source
+
+📖 **Books:**
+- "Learning TypeScript" by Josh Goldberg
+- "Clean Code" by Robert Martin
+
