@@ -262,7 +262,85 @@ it('filling email and submitting shows success message', async () => {
 
 ---
 
-## **სლაიდი 8: Commands**
+## **სლაიდი 8: Test File Conventions**
+
+### **სად შევინახოთ ტესტ ფაილები?**
+
+**ვარიანტი 1 (რეკომენდებული) — კომპონენტის გვერდით:**
+```
+src/
+├── components/
+│   ├── LoginPage.tsx
+│   ├── LoginPage.test.tsx      # ← ტესტი იმავე ფოლდერში
+│   ├── RegisterPage.tsx
+│   ├── RegisterPage.test.tsx
+│   ├── ForgotPasswordPage.tsx
+│   └── ForgotPasswordPage.test.tsx
+```
+
+**ვარიანტი 2 — ცალკე `__tests__` ფოლდერი:**
+```
+src/
+├── components/
+│   ├── LoginPage.tsx
+│   └── RegisterPage.tsx
+└── __tests__/
+    ├── LoginPage.test.tsx      # ← ტესტები გამოყოფილი
+    └── RegisterPage.test.tsx
+```
+
+> **რატომ გვერდით?** — import-ის მოკლე path, ხედავ რა აქვს ტესტი, ფოლდერი არ იბნევა.
+
+---
+
+### **რა ექსთენშია (დასახელება)?**
+
+| Pattern | მაგალითი | ახსნა |
+|---------|-----------|-------|
+| `*.test.tsx` | `LoginPage.test.tsx` | **✅ რეკომენდებული** — Vitest-ი default-ად ეძებს |
+| `*.spec.tsx` | `LoginPage.spec.tsx` | ალტერნატივა, тоже მუშაობს |
+| `*.test.ts` | `utils.test.ts` | თუ არა React კომპონენტი (pure functions) |
+
+`test.tsx` vs `test.ts`:
+- **`.test.tsx`** — როცა ტესტში JSX / React კომპონენტებია (`render(<LoginPage />)`)
+- **`.test.ts`** — როცა ტესტავთ ლოგიკას / helper ფუნქციებს JSX-ის გარეშე
+
+---
+
+### **როგორ გავუშვათ?**
+
+```bash
+npm test                      # watch mode — auto-rerun on change
+npx vitest run                # run once (CI/CD-სთვის)
+npx vitest run --coverage     # coverage report (lines/branches/functions)
+npx vitest run App            # App.test.tsx — კონკრეტული ფაილი
+npx vitest run src/pages/     # pages/ ფოლდერის ყველა ტესტი
+npx vitest run -t "Login"     # ტესტები სათაურით "Login"
+npx vitest run -t "navigat"   # case-insensitive partial match
+```
+
+**Vitest Config** (`vitest.config.ts` ან `vite.config.ts`-ში):
+```typescript
+/// <reference types="vitest" />
+import { defineConfig } from 'vite'
+
+export default defineConfig({
+  test: {
+    globals: true,                    // describe, it, expect — გლობალურად
+    environment: 'jsdom',             // DOM-ის მოკი (browser-ის სიმულაცია)
+    setupFiles: './src/test/setup.ts', // jest-dom matchers-ის ჩატვირთვა
+  },
+})
+```
+
+**setup.ts** (`src/test/setup.ts`):
+```typescript
+import '@testing-library/jest-dom'
+```
+
+---
+
+## **სლაიდი 9: Commands**
 
 ```bash
 npm test                    # watch mode
@@ -275,7 +353,7 @@ npx vitest run -t "navigat" # case insensitive
 
 ---
 
-## **სლაიდი 9: Summary**
+## **სლაიდი 10: Summary**
 
 **რას ვამოწმებთ:**
 | Test | Code |
