@@ -1,3 +1,6 @@
 reserved
 skippresentation.md
 book
+node_modules
+dist
+dist-ssr

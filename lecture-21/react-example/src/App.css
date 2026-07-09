@@ -1,0 +1,180 @@
+/* Layout */
+.layout {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 0;
+  border-bottom: 2px solid var(--border);
+  margin-bottom: 32px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+header h1 {
+  font-size: 22px;
+  font-weight: 600;
+  margin: 0;
+  color: var(--text-h);
+}
+
+nav {
+  display: flex;
+  gap: 8px;
+}
+
+nav a {
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-weight: 500;
+  transition: background 0.2s;
+  color: var(--text);
+}
+
+nav a:hover {
+  background: var(--accent-light);
+  text-decoration: none;
+}
+
+nav a.active {
+  background: var(--accent);
+  color: white;
+}
+
+/* Home */
+.home h2 {
+  text-align: center;
+  margin-bottom: 28px;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.card {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 20px;
+  text-align: center;
+}
+
+.card h3 {
+  margin: 0 0 8px;
+  color: var(--text-h);
+}
+
+.card p {
+  font-size: 14px;
+}
+
+.stats {
+  display: flex;
+  justify-content: center;
+  gap: 32px;
+  font-size: 18px;
+  padding: 16px;
+  background: var(--accent-light);
+  border-radius: 10px;
+}
+
+/* List pages */
+.list-page h2 {
+  margin-bottom: 20px;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.list-item {
+  display: block;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 16px 20px;
+  transition: box-shadow 0.2s, border-color 0.2s;
+  color: var(--text);
+}
+
+.list-item:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  border-color: var(--accent);
+  text-decoration: none;
+}
+
+.list-item h3 {
+  margin: 0 0 6px;
+  font-size: 17px;
+  color: var(--text-h);
+}
+
+.list-item p {
+  font-size: 14px;
+  margin: 0;
+}
+
+/* User card */
+.user-card p {
+  margin: 2px 0;
+  font-size: 14px;
+}
+
+/* Detail page */
+.detail-page h2 {
+  margin: 16px 0 12px;
+}
+
+.detail-page .body {
+  font-size: 16px;
+  line-height: 1.7;
+  margin-bottom: 28px;
+}
+
+.comments {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.comment {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 14px 18px;
+}
+
+.comment strong {
+  display: block;
+  color: var(--text-h);
+}
+
+.comment .email {
+  font-size: 13px;
+  color: #6b7280;
+}
+
+.comment p {
+  margin: 6px 0 0;
+  font-size: 14px;
+}
+
+/* Error page */
+.error-page {
+  text-align: center;
+  padding: 60px 20px;
+}
+
+.error-page h2 {
+  margin-bottom: 16px;
+}

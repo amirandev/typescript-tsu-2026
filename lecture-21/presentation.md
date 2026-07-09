@@ -388,6 +388,50 @@ class PostsApi extends BaseApiClient<Post> {
 
 **Generics:** `BaseApiClient<T>` — T განსაზღვრავს, რა ტიპის მონაცემს ველით API-დან.
 
+### 🔍 რა არის `<T>` (Generics)?
+
+`<T>` — ეს არის **ტიპის პარამეტრი** (type parameter). წარმოიდგინეთ, რომ კლასს ან ფუნქციას წინასწარ არ ვუთმობთ, კონკრეტულად რა ტიპთან უნდა იმუშაოს. ამის ნაცვლად, ტიპს გადავცემთ გამოყენების დროს:
+
+```typescript
+// T არის placeholder — გამოყენებისას ჩანაცვლდება რეალური ტიპით
+abstract class BaseApiClient<T> {
+  async getById(id: number): Promise<T> { ... }
+}
+
+// აქ T = Post
+class PostsApi extends BaseApiClient<Post> { }
+
+// აქ T = User
+class UsersApi extends BaseApiClient<User> { }
+```
+
+**მარტივი ანალოგია:** `<T>` ჰგავს ცარიელ ფორმას (template), რომელშიც ტიპს მოგვიანებით ჩაწერთ. `BaseApiClient<Post>` ნიშნავს "აიღე BaseApiClient და ჩაწერე Post ტიპი T-ის ადგილას".
+
+### 🔍 რა არის `Promise<T>`?
+
+`Promise<T>` — ეს არის **ასინქრონული ოპერაციის შედეგი**, რომელიც მომავალში დაბრუნებს `T` ტიპის მნიშვნელობას.
+
+```typescript
+// Promise<Post[]>  →  მომავალში დაბრუნდება Post[] (პოსტების სია)
+async getAll(): Promise<Post[]> {
+  return this.request<Post[]>('/posts')
+}
+
+// Promise<User>    →  მომავალში დაბრუნდება User (ერთი მომხმარებელი)
+async getById(id: number): Promise<User> {
+  return this.request<User>(`/users/${id}`)
+}
+```
+
+**მარტივი ანალოგია:** `Promise<T>` ჰგავს შეკვეთას რესტორანში — გპირდებით, რომ მიიღებთ კერძს (`T`), მაგრამ არა მაშინვე, ცოტა ხანში.
+
+**`async` / `await`:** `async` ფუნქცია ყოველთვის აბრუნებს `Promise`-ს. `await` ელოდება Promise-ის შესრულებას და გვიბრუნებს თვითონ `T` ტიპის მნიშვნელობას.
+
+```typescript
+const post: Post = await api.posts.getById(1)
+//            ^ Promise<T> "გაიხსნა" და მივიღეთ თვითონ T (ანუ Post)
+```
+
 ---
 
 ## **სლაიდი 15: Summary**
