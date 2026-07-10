@@ -1,450 +1,144 @@
-# ლექცია 21 — OOP პრაქტიკული: JSONPlaceholder API
+# Lecture 21: JSONPlaceholder API Client
 
 ---
 
-## **სლაიდი 1**
-### **OOP პრინციპები JSONPlaceholder API-ს მაგალითზე**
+## What is this?
 
-**რას გავაკეთებთ:**
-- Class-ებით ავაწყობთ API კლიენტს
-- გამოვიყენებთ 4-ვე OOP პრინციპს
-- ვიმუშავებთ JSONPlaceholder-ის რეალურ API-სთან
-
-**API:** https://jsonplaceholder.typicode.com
+A reusable API client class that talks to JSONPlaceholder — a free fake REST API for testing.
 
 ---
 
-## **სლაიდი 2: 4 OOP პრინციპი**
+## JsonPlaceholder Class
 
-| პრინციპი | მნიშვნელობა | API მაგალითი |
-|-----------|-------------|--------------|
-| **Encapsulation** | მონაცემების დაცვა, მხოლოდ საჭირო ინტერფეისის გამოტანა | `private` ფილდები, `public` მეთოდები |
-| **Inheritance** | ერთი კლასის მეორეზე აგება | `class UsersApi extends BaseApi` |
-| **Polymorphism** | ერთი ინტერფეისი, სხვადასხვა ქცევა | `getById(id)` მუშაობს ყველა resource-ზე |
-| **Abstraction** | სირთულის დამალვა, მარტივი ინტერფეისის შეთავაზება | `fetch()`-ს ვახვევთ `request()` მეთოდში |
+```ts
+export class JsonPlaceholder {
+    private static BASE_URL = 'https://jsonplaceholder.typicode.com/';
 
----
-
-## **სლაიდი 3: API Structure**
-
-JSONPlaceholder გვაძლევს 6 resource-ს:
-
-```
-GET    /posts        → ყველა პოსტი
-GET    /posts/1      → ერთი პოსტი
-POST   /posts        → ახალი პოსტის შექმნა
-PUT    /posts/1      → პოსტის განახლება
-DELETE /posts/1      → პოსტის წაშლა
-
-GET    /users        → ყველა მომხმარებელი
-GET    /posts?userId=1 → პოსტები userId-ით
-```
-
----
-
-## **სლაიდი 4: Interfaces — მონაცემების ტიპები**
-
-```typescript
-interface Post {
-  id: number
-  userId: number
-  title: string
-  body: string
-}
-
-interface User {
-  id: number
-  name: string
-  username: string
-  email: string
-  phone: string
-  website: string
-}
-
-interface Comment {
-  id: number
-  postId: number
-  name: string
-  email: string
-  body: string
-}
-
-interface Geo {
-  lat: string
-  lng: string
-}
-```
-
----
-
-## **სლაიდი 5: Abstract Base Class — Abstraction**
-
-```typescript
-abstract class BaseApiClient {
-  protected readonly baseUrl = 'https://jsonplaceholder.typicode.com'
-
-  protected async request<T>(endpoint: string, options?: RequestInit): Promise<T> {
-    const response = await fetch(`${this.baseUrl}${endpoint}`, {
-      headers: { 'Content-Type': 'application/json' },
-      ...options,
-    })
-
-    if (!response.ok) {
-      throw new ApiError(
-        `Request failed: ${response.statusText}`,
-        response.status
-      )
+    protected static async callApi(path: string, options?: RequestInit) {
+        const response = await fetch(`${BASE_URL}/${path}`, {
+            headers: { 'Content-Type': 'application/json' },
+            ...options,
+        })
+        if (!response.ok) {
+            console.log('Request failed:', response.statusText, response.status);
+        }
+        return response.json()
     }
-
-    return response.json()
-  }
-
-  // აბსტრაქტული — თითოეულმა კლასმა თავისი resource უნდა მიუთითოს
-  abstract getResourceName(): string
-}
 ```
 
-**რატომ abstract?** — `BaseApiClient`-ს თავისით აზრი არ აქვს. მხოლოდ შვილობილი კლასები განსაზღვრავენ API-ს რომელ ნაწილს მიმართავენ.
+- `static` — no need to instantiate
+- `callApi` — generic fetch wrapper, handles headers and JSON parsing
+- All other methods call `callApi` with a specific path
 
 ---
 
-## **სლაიდი 6: Error Class — Encapsulation**
+## Available Methods
 
-```typescript
-class ApiError extends Error {
-  public readonly statusCode: number
-  public readonly timestamp: Date
-
-  constructor(message: string, statusCode: number) {
-    super(message)
-    this.name = 'ApiError'
-    this.statusCode = statusCode
-    this.timestamp = new Date()
-  }
-
-  get isNotFound(): boolean {
-    return this.statusCode === 404
-  }
-
-  get isServerError(): boolean {
-    return this.statusCode >= 500
-  }
-}
-```
-
-**Encapsulation:** `statusCode` და `timestamp` წაკითხვა შეიძლება, მაგრამ `ApiError`-ს შიგნით ვმართავთ. გარედან მხოლოდ `isNotFound` / `isServerError`-ს ვიყენებთ.
+| Method | HTTP | Endpoint |
+|--------|------|----------|
+| `getPosts()` | GET | `/posts` |
+| `getUsers()` | GET | `/users` |
+| `getComments()` | GET | `/comments` |
+| `createPost(data)` | POST | `/posts` |
 
 ---
 
-## **სლაიდი 7: PostsApi — Inheritance**
+## UserType Interface
 
-```typescript
-class PostsApi extends BaseApiClient {
-  getResourceName(): string {
-    return 'posts'
-  }
-
-  async getAll(): Promise<Post[]> {
-    return this.request<Post[]>('/posts')
-  }
-
-  async getById(id: number): Promise<Post> {
-    return this.request<Post>(`/posts/${id}`)
-  }
-
-  async create(data: Omit<Post, 'id'>): Promise<Post> {
-    return this.request<Post>('/posts', {
-      method: 'POST',
-      body: JSON.stringify(data),
-    })
-  }
-
-  async update(id: number, data: Partial<Post>): Promise<Post> {
-    return this.request<Post>(`/posts/${id}`, {
-      method: 'PUT',
-      body: JSON.stringify(data),
-    })
-  }
-
-  async delete(id: number): Promise<void> {
-    await this.request<{}>(`/posts/${id}`, { method: 'DELETE' })
-  }
-
-  async getByUser(userId: number): Promise<Post[]> {
-    return this.request<Post[]>(`/posts?userId=${userId}`)
-  }
+```ts
+export interface UserType{
+    id: number,
+    name: string,
+    username: string,
+    email: string,
+    address: { street, suite, city, zipcode },
+    geo: { lat, lng },
+    phone: string,
+    website: string,
+    company: { name, catchPhrase, bs }
 }
 ```
 
-**Inheritance:** `PostsApi` მემკვიდრეობით იღებს `request`, `baseUrl`-ს. ამატებს მხოლოდ posts-ს სპეციფიკურ მეთოდებს.
+Maps the JSON response from `/users` to a typed object.
 
 ---
 
-## **სლაიდი 8: UsersApi — კიდევ ერთი მემკვიდრე**
+## Posts Component
 
-```typescript
-class UsersApi extends BaseApiClient {
-  getResourceName(): string {
-    return 'users'
-  }
-
-  async getAll(): Promise<User[]> {
-    return this.request<User[]>('/users')
-  }
-
-  async getById(id: number): Promise<User> {
-    return this.request<User>(`/users/${id}`)
-  }
-
-  async getPosts(id: number): Promise<Post[]> {
-    // users/1/posts — JSONPlaceholder ამასაც უჭერს მხარს
-    return this.request<Post[]>(`/users/${id}/posts`)
-  }
-}
+```tsx
+export default function Posts() {
+    const [posts, setPosts] = useState<PostType[]>([])
+    const [userID, setUserId] = useState<number>(0)
+    const [text, setText] = useState<string>("");
 ```
 
-**Inheritance-ის ძალა:** იგივე `request()` მეთოდი, მაგრამ UsersApi იყენებს `/users` endpoint-ს, PostsApi იყენებს `/posts`-ს. код-ის დუბლირება არ ხდება.
+State:
+- `posts` — list of posts from API
+- `userID` — userId for creating a new post
+- `text` — body text for a new post
 
 ---
 
-## **სლაიდი 9: Polymorphism მაგალითი**
+## Fetching Data on Load
 
-```typescript
-// ერთი ინტერფეისი, სხვადასხვა ქცევა
-async function printResourceInfo(api: BaseApiClient): Promise<void> {
-  console.log(`Fetching from: ${api.getResourceName()}`)
-}
-
-const postsApi = new PostsApi()
-const usersApi = new UsersApi()
-
-printResourceInfo(postsApi) // "Fetching from: posts"
-printResourceInfo(usersApi) // "Fetching from: users"
+```tsx
+useEffect(() => {
+    JsonPlaceholder.getPosts().then(data => setPosts(data));
+}, [])
 ```
 
-**ან რეალური მაგალითი:**
-
-```typescript
-class CommentsApi extends BaseApiClient {
-  getResourceName(): string {
-    return 'comments'
-  }
-
-  async getByPost(postId: number): Promise<Comment[]> {
-    return this.request<Comment[]>(`/comments?postId=${postId}`)
-  }
-}
-```
+- Runs once when component mounts
+- Calls `getPosts()` from the service class
+- Sets state with the response
 
 ---
 
-## **სლაიდი 10: Facade — ყველაფრის გაერთიანება**
+## Creating a Post
 
-```typescript
-class JsonPlaceholderApi {
-  public readonly posts: PostsApi
-  public readonly users: UsersApi
-  public readonly comments: CommentsApi
-
-  constructor() {
-    this.posts = new PostsApi()
-    this.users = new UsersApi()
-    this.comments = new CommentsApi()
-  }
+```tsx
+function addPost() {
+    JsonPlaceholder.createPost({
+        userId: userID,
+        id: 56988767555,
+        title: "example",
+        body: text
+    }).then(response => console.log(response))
 }
-
-// გამოყენება:
-const api = new JsonPlaceholderApi()
-
-const posts = await api.posts.getAll()
-const user = await api.users.getById(1)
-const comments = await api.comments.getByPost(1)
 ```
 
-**Abstraction:** მომხმარებელმა არ იცის, როგორ მუშაობს `request()`, `fetch()`, error handling. უბრალოდ იძახებს `api.posts.getAll()`-ს.
+- Builds payload from component state
+- Sends POST via `createPost()`
+- Logs the API response
 
 ---
 
-## **სლაიდი 11: Full Example — async/await-ით**
+## The UI
 
-```typescript
-async function main() {
-  const api = new JsonPlaceholderApi()
-
-  try {
-    // GET — ყველა პოსტი
-    const allPosts = await api.posts.getAll()
-    console.log(`სულ ${allPosts.length} პოსტი`)
-
-    // GET — ერთი პოსტი
-    const post = await api.posts.getById(1)
-    console.log(post.title)
-
-    // POST — ახალი პოსტი
-    const newPost = await api.posts.create({
-      userId: 1,
-      title: 'ჩემი პირველი პოსტი',
-      body: 'ეს არის OOP მაგალითი'
-    })
-    console.log(`შეიქმნა პოსტი ID: ${newPost.id}`)
-
-    // PUT — განახლება
-    await api.posts.update(1, { title: 'განახლებული სათაური' })
-
-    // DELETE — წაშლა
-    await api.posts.delete(1)
-
-  } catch (error) {
-    if (error instanceof ApiError && error.isNotFound) {
-      console.log('404 — პოსტი ვერ მოიძებნა')
-    }
-  }
-}
-
-main()
+```tsx
+return <main>
+    <h1>Posts</h1>
+    <input type="number" onChange={(e) => setUserId(parseInt(e.target.value))} />
+    <textarea onChange={(e) => setText(e.target.value)}></textarea>
+    <button onClick={addPost}>Add post</button>
+    <ul>
+        {posts.map((post, index) =>
+            <li key={index}>
+                <strong>{post.title}</strong><br />
+                <p>{post.body}</p>
+            </li>
+        )}
+    </ul>
+</main>
 ```
+
+Inputs for userId + body, button to create, list to display posts.
 
 ---
 
-## **სლაიდი 12: SOLID — Single Responsibility**
+## Summary
 
-თითოეულ კლასს აქვს **ერთი პასუხისმგებლობა**:
-
-| კლასი | პასუხისმგებლობა |
-|-------|-----------------|
-| `BaseApiClient` | HTTP requests + error handling |
-| `PostsApi` | Posts resource-ის მართვა |
-| `UsersApi` | Users resource-ის მართვა |
-| `CommentsApi` | Comments resource-ის მართვა |
-| `ApiError` | Error ინფორმაციის შენახვა |
-| `JsonPlaceholderApi` | Facade — ყველაფრის გაერთიანება |
-
----
-
-## **სლაიდი 13: Static Methods + Singleton**
-
-```typescript
-class JsonPlaceholderApi {
-  private static instance: JsonPlaceholderApi
-
-  public readonly posts: PostsApi
-  public readonly users: UsersApi
-  public readonly comments: CommentsApi
-
-  private constructor() {
-    this.posts = new PostsApi()
-    this.users = new UsersApi()
-    this.comments = new CommentsApi()
-  }
-
-  static getInstance(): JsonPlaceholderApi {
-    if (!JsonPlaceholderApi.instance) {
-      JsonPlaceholderApi.instance = new JsonPlaceholderApi()
-    }
-    return JsonPlaceholderApi.instance
-  }
-}
-
-// გამოყენება:
-const api = JsonPlaceholderApi.getInstance()
-```
-
-**Singleton:** გვაძლევს გარანტიას, რომ მთელ აპლიკაციაში API კლიენტის მხოლოდ ერთი ეგზემპლარი არსებობს.
-
----
-
-## **სლაიდი 14: Generics-ით უფრო მოქნილი**
-
-```typescript
-abstract class BaseApiClient<T> {
-  protected readonly baseUrl = 'https://jsonplaceholder.typicode.com'
-
-  abstract getResourceName(): string
-
-  async getAll(): Promise<T[]> {
-    return this.request<T[]>(`/${this.getResourceName()}`)
-  }
-
-  async getById(id: number): Promise<T> {
-    return this.request<T>(`/${this.getResourceName()}/${id}`)
-  }
-
-  protected async request<U>(endpoint: string, options?: RequestInit): Promise<U> {
-    const response = await fetch(`${this.baseUrl}${endpoint}`, {
-      headers: { 'Content-Type': 'application/json' },
-      ...options,
-    })
-    if (!response.ok) throw new ApiError('Failed', response.status)
-    return response.json()
-  }
-}
-
-class PostsApi extends BaseApiClient<Post> {
-  getResourceName(): string { return 'posts' }
-  // getAll() ავტომატურად აბრუნებს Promise<Post[]>
-  // getById() ავტომატურად აბრუნებს Promise<Post>
-}
-```
-
-**Generics:** `BaseApiClient<T>` — T განსაზღვრავს, რა ტიპის მონაცემს ველით API-დან.
-
-### 🔍 რა არის `<T>` (Generics)?
-
-`<T>` — ეს არის **ტიპის პარამეტრი** (type parameter). წარმოიდგინეთ, რომ კლასს ან ფუნქციას წინასწარ არ ვუთმობთ, კონკრეტულად რა ტიპთან უნდა იმუშაოს. ამის ნაცვლად, ტიპს გადავცემთ გამოყენების დროს:
-
-```typescript
-// T არის placeholder — გამოყენებისას ჩანაცვლდება რეალური ტიპით
-abstract class BaseApiClient<T> {
-  async getById(id: number): Promise<T> { ... }
-}
-
-// აქ T = Post
-class PostsApi extends BaseApiClient<Post> { }
-
-// აქ T = User
-class UsersApi extends BaseApiClient<User> { }
-```
-
-**მარტივი ანალოგია:** `<T>` ჰგავს ცარიელ ფორმას (template), რომელშიც ტიპს მოგვიანებით ჩაწერთ. `BaseApiClient<Post>` ნიშნავს "აიღე BaseApiClient და ჩაწერე Post ტიპი T-ის ადგილას".
-
-### 🔍 რა არის `Promise<T>`?
-
-`Promise<T>` — ეს არის **ასინქრონული ოპერაციის შედეგი**, რომელიც მომავალში დაბრუნებს `T` ტიპის მნიშვნელობას.
-
-```typescript
-// Promise<Post[]>  →  მომავალში დაბრუნდება Post[] (პოსტების სია)
-async getAll(): Promise<Post[]> {
-  return this.request<Post[]>('/posts')
-}
-
-// Promise<User>    →  მომავალში დაბრუნდება User (ერთი მომხმარებელი)
-async getById(id: number): Promise<User> {
-  return this.request<User>(`/users/${id}`)
-}
-```
-
-**მარტივი ანალოგია:** `Promise<T>` ჰგავს შეკვეთას რესტორანში — გპირდებით, რომ მიიღებთ კერძს (`T`), მაგრამ არა მაშინვე, ცოტა ხანში.
-
-**`async` / `await`:** `async` ფუნქცია ყოველთვის აბრუნებს `Promise`-ს. `await` ელოდება Promise-ის შესრულებას და გვიბრუნებს თვითონ `T` ტიპის მნიშვნელობას.
-
-```typescript
-const post: Post = await api.posts.getById(1)
-//            ^ Promise<T> "გაიხსნა" და მივიღეთ თვითონ T (ანუ Post)
-```
-
----
-
-## **სლაიდი 15: Summary**
-
-| OOP პრინციპი | როგორ გამოვიყენეთ |
-|--------------|-------------------|
-| **Encapsulation** | `private` ფილდები, `ApiError` კლასი, `protected baseUrl` |
-| **Inheritance** | `PostsApi extends BaseApiClient`, `UsersApi extends BaseApiClient` |
-| **Polymorphism** | `getResourceName()` — იგივე მეთოდი, განსხვავებული შედეგი |
-| **Abstraction** | `request()` შიგნით იმალება fetch, headers, error handling |
-
-**რესურსები:**
-- [JSONPlaceholder](https://jsonplaceholder.typicode.com) — უფასო API ტესტირებისთვის
-- [TypeScript Classes](https://www.typescriptlang.org/docs/handbook/2/classes.html)
-
-**პრაქტიკული რჩევა:** OOP არ ნიშნავს, რომ ყველგან კლასები უნდა გამოიყენოთ. მაგრამ API კლიენტის აწყობა კლასებით — ბუნებრივი და გავრცელებული pattern-ია.
+- **Service layer** keeps API logic separate from components
+- **Static methods** make it easy to call from anywhere
+- **Interfaces** give us type safety
+- **useEffect** fetches data on mount
+- **Controlled inputs + state** handle POST data
